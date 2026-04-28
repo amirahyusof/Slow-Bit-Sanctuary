@@ -77,22 +77,22 @@ function LogIcon({ active }) {
 const TABS = [
   {
     id:    'garden',
-    label: 'garden',
+    label: 'Garden',
     Icon:  GardenIcon,
   },
   {
     id:    'today',
-    label: 'today',
+    label: 'Today',
     Icon:  TodayIcon,
   },
   {
     id:    'calendar',
-    label: 'calendar',
+    label: 'Calendar',
     Icon:  CalendarIcon,
   },
   {
     id:    'log',
-    label: 'log',
+    label: 'Log',
     Icon:  LogIcon,
   },
 ]
