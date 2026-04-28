@@ -1,123 +1,132 @@
-// TodayView.jsx
-// Phase 2: The full Today page.
+// TodayView.jsx — Phase 2 (fixed)
 //
-// Shows:
-//   - Pixel character scene (standing or sitting based on state)
-//   - Gentle question prompt
-//   - Text input with 140-char counter
-//   - "Plant It" button → saves win, grows a flower
-//   - "Bukan Hustle" button → rest message + character sits
-//   - If already logged today → shows what was logged
-//   - Recent wins preview (last 3 entries)
+// Fixes:
+//   1. Bukan Hustle button is ALWAYS visible (not gated by input text)
+//   2. After planting, "already logged" card shows — no blank screen bug
+//   3. New character: pixel cat (loaf mode when resting)
 
 import { useState, useEffect } from 'react'
 import {
   getTodayEntry,
   saveTodayEntry,
   getAllEntriesSorted,
-  todayKey,
-  formatDate,
 } from '../utils/storage'
-import { getFlowerType, getGrowthStage } from './PixelPlant'
+import { getFlowerType } from './PixelPlant'
 import PixelPlant from './PixelPlant'
 
 const MAX_CHARS = 140
 
-// ── Pixel character SVG ───────────────────────────────────────
-// Two states: standing (normal) and sitting (Bukan Hustle)
-function PixelCharacter({ sitting = false, bouncing = false }) {
+// ─────────────────────────────────────────────────────────────
+// PIXEL CAT — standing or loaf (sitting)
+// ─────────────────────────────────────────────────────────────
+function PixelCat({ sitting = false, bouncing = false }) {
   return (
     <svg
-      width="44"
-      height="56"
-      viewBox="0 0 44 56"
+      width="48" height="52"
+      viewBox="0 0 48 52"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{
         imageRendering: 'pixelated',
         display:        'block',
-        transform:      bouncing ? 'translateY(-6px)' : 'translateY(0)',
-        transition:     'transform 0.3s ease',
+        transform:      bouncing ? 'translateY(-8px)' : 'translateY(0)',
+        transition:     'transform 0.35s cubic-bezier(.36,1.56,.64,1)',
       }}
     >
-      {/* ── Head ──────────────────────────────────────── */}
-      <rect x="16" y="2"  width="12" height="11" fill="#FFDAB9" />
       {/* Ears */}
-      <rect x="13" y="4"  width="3"  height="7"  fill="#FFDAB9" />
-      <rect x="28" y="4"  width="3"  height="7"  fill="#FFDAB9" />
-      {/* Eyes */}
-      <rect x="17" y="6"  width="3"  height="2"  fill="#5C3D1E" />
-      <rect x="24" y="6"  width="3"  height="2"  fill="#5C3D1E" />
-      {/* Eye shine */}
-      <rect x="18" y="6"  width="1"  height="1"  fill="#FFF8F0" />
-      <rect x="25" y="6"  width="1"  height="1"  fill="#FFF8F0" />
-      {/* Smile */}
-      <rect x="18" y="10" width="8"  height="2"  fill={sitting ? '#FFB3C6' : '#E07060'} />
-
-      {/* ── Body ──────────────────────────────────────── */}
-      <rect x="14" y="13" width="16" height="13" fill="#C8A8E8" />
-
-      {/* ── Arms ──────────────────────────────────────── */}
+      <rect x="10" y="0"  width="6"  height="8"  fill="#FFDAB9" />
+      <rect x="32" y="0"  width="6"  height="8"  fill="#FFDAB9" />
+      <rect x="11" y="1"  width="4"  height="5"  fill="#FFB3C6" />
+      <rect x="33" y="1"  width="4"  height="5"  fill="#FFB3C6" />
+      {/* Head */}
+      <rect x="8"  y="6"  width="32" height="20" fill="#FFDAB9" />
+      <rect x="6"  y="8"  width="2"  height="16" fill="#FFDAB9" />
+      <rect x="40" y="8"  width="2"  height="16" fill="#FFDAB9" />
+      {/* Open eyes (when not sitting) */}
       {!sitting && (
         <>
-          {/* Standing: arms at sides */}
-          <rect x="9"  y="13" width="5"  height="9"  fill="#C8A8E8" />
-          <rect x="30" y="13" width="5"  height="9"  fill="#C8A8E8" />
+          <rect x="13" y="12" width="6"  height="5"  fill="#5C3D1E" />
+          <rect x="14" y="11" width="4"  height="1"  fill="#5C3D1E" />
+          <rect x="14" y="12" width="2"  height="2"  fill="#FFF8F0" />
+          <rect x="29" y="12" width="6"  height="5"  fill="#5C3D1E" />
+          <rect x="30" y="11" width="4"  height="1"  fill="#5C3D1E" />
+          <rect x="30" y="12" width="2"  height="2"  fill="#FFF8F0" />
         </>
       )}
+      {/* Happy closed eyes (when sitting / loaf) */}
       {sitting && (
         <>
-          {/* Sitting: arms resting on knees */}
-          <rect x="9"  y="20" width="5"  height="4"  fill="#C8A8E8" />
-          <rect x="30" y="20" width="5"  height="4"  fill="#C8A8E8" />
-          {/* Hands resting */}
-          <rect x="8"  y="28" width="5"  height="4"  fill="#FFDAB9" />
-          <rect x="31" y="28" width="5"  height="4"  fill="#FFDAB9" />
+          <rect x="13" y="15" width="6"  height="2"  fill="#5C3D1E" />
+          <rect x="14" y="14" width="4"  height="1"  fill="#5C3D1E" />
+          <rect x="29" y="15" width="6"  height="2"  fill="#5C3D1E" />
+          <rect x="30" y="14" width="4"  height="1"  fill="#5C3D1E" />
+        </>
+      )}
+      {/* Nose */}
+      <rect x="22" y="18" width="4"  height="3"  fill="#FFB3C6" />
+      {/* Whiskers */}
+      <rect x="8"  y="19" width="8"  height="1"  fill="#C4A07A" />
+      <rect x="8"  y="21" width="8"  height="1"  fill="#C4A07A" />
+      <rect x="32" y="19" width="8"  height="1"  fill="#C4A07A" />
+      <rect x="32" y="21" width="8"  height="1"  fill="#C4A07A" />
+      {/* Mouth */}
+      <rect x="20" y="22" width="3"  height="2"  fill="#E07060" />
+      <rect x="25" y="22" width="3"  height="2"  fill="#E07060" />
+      <rect x="22" y="23" width="4"  height="1"  fill="#E07060" />
+
+      {/* Body */}
+      <rect x="12" y="26" width="24" height="14" fill="#C8A8E8" />
+      <rect x="18" y="27" width="12" height="10" fill="#FFE4F0" />
+
+      {/* Standing: arms + legs + tail up */}
+      {!sitting && (
+        <>
+          <rect x="6"  y="26" width="6"  height="8"  fill="#C8A8E8" />
+          <rect x="36" y="26" width="6"  height="8"  fill="#C8A8E8" />
+          <rect x="7"  y="33" width="4"  height="3"  fill="#FFDAB9" />
+          <rect x="37" y="33" width="4"  height="3"  fill="#FFDAB9" />
+          <rect x="15" y="40" width="7"  height="10" fill="#C8A8E8" />
+          <rect x="26" y="40" width="7"  height="10" fill="#C8A8E8" />
+          <rect x="13" y="48" width="9"  height="4"  fill="#FFDAB9" />
+          <rect x="26" y="48" width="9"  height="4"  fill="#FFDAB9" />
+          {/* Tail up */}
+          <rect x="36" y="28" width="4"  height="2"  fill="#FFDAB9" />
+          <rect x="38" y="24" width="2"  height="6"  fill="#FFDAB9" />
+          <rect x="40" y="22" width="4"  height="2"  fill="#FFDAB9" />
         </>
       )}
 
-      {/* ── Legs ──────────────────────────────────────── */}
-      {!sitting && (
-        <>
-          {/* Standing legs */}
-          <rect x="16" y="26" width="5"  height="14" fill="#9090C0" />
-          <rect x="23" y="26" width="5"  height="14" fill="#9090C0" />
-          {/* Shoes */}
-          <rect x="14" y="40" width="7"  height="4"  fill="#7B4F2E" />
-          <rect x="23" y="40" width="7"  height="4"  fill="#7B4F2E" />
-        </>
-      )}
+      {/* Loaf cat: everything tucked, tail wraps front */}
       {sitting && (
         <>
-          {/* Sitting: legs bent forward */}
-          <rect x="14" y="26" width="6"  height="6"  fill="#9090C0" />
-          <rect x="24" y="26" width="6"  height="6"  fill="#9090C0" />
-          {/* Lower legs horizontal */}
-          <rect x="8"  y="32" width="10" height="5"  fill="#9090C0" />
-          <rect x="26" y="32" width="10" height="5"  fill="#9090C0" />
-          {/* Shoes */}
-          <rect x="6"  y="36" width="6"  height="4"  fill="#7B4F2E" />
-          <rect x="32" y="36" width="6"  height="4"  fill="#7B4F2E" />
+          <rect x="8"  y="36" width="8"  height="6"  fill="#C8A8E8" />
+          <rect x="32" y="36" width="8"  height="6"  fill="#C8A8E8" />
+          <rect x="12" y="40" width="24" height="8"  fill="#C8A8E8" />
+          <rect x="14" y="46" width="20" height="4"  fill="#FFDAB9" />
+          {/* Tail wraps around front */}
+          <rect x="4"  y="36" width="2"  height="6"  fill="#FFDAB9" />
+          <rect x="6"  y="40" width="4"  height="2"  fill="#FFDAB9" />
         </>
       )}
     </svg>
   )
 }
 
-// ── Watering can SVG (tips when Plant It is pressed) ──────────
+// ─────────────────────────────────────────────────────────────
+// WATERING CAN
+// ─────────────────────────────────────────────────────────────
 function WateringCan({ tipped = false }) {
   return (
     <svg
-      width="32"
-      height="32"
+      width="32" height="32"
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{
-        imageRendering: 'pixelated',
-        display:        'block',
-        transform:      tipped ? 'rotate(-40deg) translateY(-4px)' : 'rotate(0deg)',
-        transition:     'transform 0.5s ease',
+        imageRendering:  'pixelated',
+        display:         'block',
+        transform:       tipped ? 'rotate(-40deg) translateY(-4px)' : 'rotate(0deg)',
+        transition:      'transform 0.5s ease',
         transformOrigin: 'bottom right',
       }}
     >
@@ -137,68 +146,55 @@ function WateringCan({ tipped = false }) {
   )
 }
 
-// ── Main component ────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────
 export default function TodayView({ momMode }) {
-  const [text,       setText]       = useState('')
-  const [todayEntry, setTodayEntry] = useState(null)
-  const [recentWins, setRecentWins] = useState([])
-  const [isSitting,  setIsSitting]  = useState(false)
-  const [isBouncing, setIsBouncing] = useState(false)
-  const [isTipped,   setIsTipped]   = useState(false)
-  const [hustleMsg,  setHustleMsg]  = useState(false)
+  const [text,        setText]        = useState('')
+  const [todayEntry,  setTodayEntry]  = useState(null)
+  const [recentWins,  setRecentWins]  = useState([])
+  const [isSitting,   setIsSitting]   = useState(false)
+  const [isBouncing,  setIsBouncing]  = useState(false)
+  const [isTipped,    setIsTipped]    = useState(false)
+  const [hustleMsg,   setHustleMsg]   = useState(false)
   const [justPlanted, setJustPlanted] = useState(false)
 
-  // Load today's entry and recent wins on mount
   useEffect(() => {
     const entry = getTodayEntry()
     setTodayEntry(entry)
-
-    const all = getAllEntriesSorted()
-    setRecentWins(all.slice(0, 4))
+    // If already rested today, show the cat in loaf mode
+    if (entry?.mode === 'rest') setIsSitting(true)
+    setRecentWins(getAllEntriesSorted().slice(0, 4))
   }, [])
 
-  // ── Plant a win ─────────────────────────────────────────────
   function handlePlant() {
     const trimmed = text.trim()
     if (!trimmed) return
-
-    // Work out what flower index this will be
-    const all         = getAllEntriesSorted()
-    const flowerType  = getFlowerType(all.length)  // next index
-
-    const saved = saveTodayEntry(trimmed, 'win', flowerType)
-
+    const all        = getAllEntriesSorted()
+    const flowerType = getFlowerType(all.length)
+    const saved      = saveTodayEntry(trimmed, 'win', flowerType)
     if (saved) {
-      // Animate: bounce character, tip watering can
       setIsBouncing(true)
       setIsTipped(true)
       setJustPlanted(true)
-
       setTimeout(() => setIsBouncing(false), 500)
       setTimeout(() => setIsTipped(false),   1500)
-
-      // Refresh state
-      const entry = getTodayEntry()
-      setTodayEntry(entry)
+      setTodayEntry(getTodayEntry())
       setRecentWins(getAllEntriesSorted().slice(0, 4))
       setText('')
     }
   }
 
-  // ── Bukan Hustle ────────────────────────────────────────────
   function handleHustle() {
     setIsSitting(true)
     setHustleMsg(true)
-
-    // If nothing logged today, also log a rest entry
     if (!todayEntry) {
       saveTodayEntry('', 'rest', null)
-      const entry = getTodayEntry()
-      setTodayEntry(entry)
+      setTodayEntry(getTodayEntry())
+      setRecentWins(getAllEntriesSorted().slice(0, 4))
     }
   }
 
-  // Stand back up if they change their mind and start typing
   function handleInputFocus() {
     if (isSitting && !todayEntry) {
       setIsSitting(false)
@@ -206,10 +202,8 @@ export default function TodayView({ momMode }) {
     }
   }
 
-  const charsLeft = MAX_CHARS - text.length
+  const charsLeft     = MAX_CHARS - text.length
   const alreadyLogged = !!todayEntry
-
-  // Sky gradient for Today page atmosphere
   const skyBg = momMode === 'sunset'
     ? 'linear-gradient(180deg, #FF9A5C 0%, #FFD580 100%)'
     : 'linear-gradient(180deg, #FDE8C8 0%, #FFF8F0 100%)'
@@ -217,111 +211,72 @@ export default function TodayView({ momMode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Pixel scene area ─────────────────────────────── */}
-      <div
-        style={{
-          background:     skyBg,
-          transition:     'background 2000ms ease',
-          minHeight:      '110px',
-          display:        'flex',
-          alignItems:     'flex-end',
-          justifyContent: 'center',
-          gap:            '20px',
-          padding:        '12px 20px 8px',
-          position:       'relative',
-        }}
-      >
-        <PixelCharacter sitting={isSitting} bouncing={isBouncing} />
-        <div style={{ marginBottom: '4px' }}>
+      {/* ── Scene ────────────────────────────────────────── */}
+      <div style={{
+        background:     skyBg,
+        transition:     'background 2000ms ease',
+        minHeight:      '120px',
+        display:        'flex',
+        alignItems:     'flex-end',
+        justifyContent: 'center',
+        gap:            '16px',
+        padding:        '12px 20px 10px',
+      }}>
+        <PixelCat sitting={isSitting || (alreadyLogged && todayEntry?.mode === 'win')} bouncing={isBouncing} />
+        <div style={{ marginBottom: '6px' }}>
           <WateringCan tipped={isTipped} />
         </div>
-
-        {/* Plant preview when just planted */}
         {justPlanted && todayEntry && (
-          <div style={{
-            marginBottom:  '0px',
-            animation:     'popIn 0.4s ease',
-          }}>
-            <PixelPlant
-              flowerType={todayEntry.flower || 'pink-dahlia'}
-              growthStage={0}
-              size={1.2}
-            />
+          <div style={{ marginBottom: '2px', animation: 'popIn 0.4s ease' }}>
+            <PixelPlant flowerType={todayEntry.flower || 'pink-dahlia'} growthStage={0} size={1.1} />
           </div>
         )}
       </div>
 
-      {/* ── Input area ───────────────────────────────────── */}
-      <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* ── Interaction ──────────────────────────────────── */}
+      <div style={{ padding: '14px 18px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
-        {/* Already logged today */}
+        {/* Already logged — WIN */}
         {alreadyLogged && todayEntry.mode === 'win' && (
           <div style={{
-            backgroundColor: 'rgba(200, 240, 220, 0.45)',
+            backgroundColor: 'rgba(200,240,220,0.45)',
             border:          '2px solid #81B89A',
-            padding:         '10px 12px',
+            padding:         '12px 14px',
+            animation:       'fadeIn 0.4s ease',
           }}>
-            <p style={{
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize:   '5px',
-              color:      '#3B6D11',
-              margin:     '0 0 6px',
-              lineHeight: '2',
-            }}>
+            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#3B6D11', margin: '0 0 8px', lineHeight: '2' }}>
               ✦ today's win is planted
             </p>
-            <p style={{
-              fontFamily: '"Nunito", sans-serif',
-              fontSize:   '13px',
-              color:      '#5C3D1E',
-              margin:     0,
-            }}>
+            <p style={{ fontFamily: '"Nunito", sans-serif', fontSize: '14px', color: '#5C3D1E', margin: '0 0 8px', lineHeight: '1.5' }}>
               "{todayEntry.text}"
             </p>
-            <p style={{
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize:   '4px',
-              color:      '#81B89A',
-              margin:     '6px 0 0',
-            }}>
+            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '4px', color: '#81B89A', margin: 0 }}>
               come back tomorrow 🌱
             </p>
           </div>
         )}
 
+        {/* Already logged — REST */}
         {alreadyLogged && todayEntry.mode === 'rest' && (
           <div style={{
-            backgroundColor: 'rgba(255, 240, 210, 0.7)',
+            backgroundColor: 'rgba(255,240,210,0.7)',
             border:          '2px solid #D4A96A',
-            padding:         '10px 12px',
+            padding:         '12px 14px',
+            animation:       'fadeIn 0.4s ease',
           }}>
-            <p style={{
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize:   '5px',
-              color:      '#9B6B4A',
-              margin:     0,
-              lineHeight: '2.2',
-            }}>
+            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#9B6B4A', margin: 0, lineHeight: '2.2' }}>
               resting today. ☕<br />your progress is safe.
             </p>
           </div>
         )}
 
-        {/* Input — hidden if already logged */}
+        {/* Nothing logged yet — show input + BOTH buttons */}
         {!alreadyLogged && (
           <>
-            {/* Gentle question */}
-            <p style={{
-              fontFamily: '"Nunito", sans-serif',
-              fontSize:   '13px',
-              color:      '#9B6B4A',
-              margin:     0,
-              lineHeight: '1.6',
-            }}>
+            <p style={{ fontFamily: '"Nunito", sans-serif', fontSize: '13px', color: '#9B6B4A', margin: 0, lineHeight: '1.6' }}>
               what is one small thing you did for yourself or your work today?
             </p>
 
-            {/* Text input */}
             <div style={{ position: 'relative' }}>
               <textarea
                 value={text}
@@ -330,165 +285,92 @@ export default function TodayView({ momMode }) {
                 placeholder="type something gentle here..."
                 rows={2}
                 style={{
-                  width:           '100%',
-                  background:      '#FFF8F0',
-                  border:          '2px solid #D4A96A',
-                  borderRadius:    '0',
-                  padding:         '8px 10px',
-                  fontFamily:      '"Nunito", sans-serif',
-                  fontSize:        '13px',
-                  color:           '#5C3D1E',
-                  outline:         'none',
-                  resize:          'none',
-                  lineHeight:      '1.5',
+                  width: '100%', background: '#FFF8F0',
+                  border: '2px solid #D4A96A', borderRadius: '0',
+                  padding: '8px 10px 20px', fontFamily: '"Nunito", sans-serif',
+                  fontSize: '13px', color: '#5C3D1E',
+                  outline: 'none', resize: 'none', lineHeight: '1.5', display: 'block',
                 }}
-                onKeyDown={e => {
-                  // Ctrl/Cmd + Enter to plant
-                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handlePlant()
-                }}
+                onKeyDown={e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handlePlant() }}
               />
-              {/* Character counter */}
-              <span style={{
-                position:   'absolute',
-                bottom:     '6px',
-                right:      '8px',
-                fontFamily: '"Press Start 2P", monospace',
-                fontSize:   '4px',
-                color:      charsLeft < 20 ? '#E07060' : '#C4A07A',
-              }}>
+              <span style={{ position: 'absolute', bottom: '6px', right: '8px', fontFamily: '"Press Start 2P", monospace', fontSize: '4px', color: charsLeft < 20 ? '#E07060' : '#C4A07A' }}>
                 {charsLeft}
               </span>
             </div>
 
-            {/* Action buttons */}
+            {/* BOTH buttons — always rendered */}
             <div style={{ display: 'flex', gap: '8px' }}>
-              {/* Plant It */}
               <button
                 onClick={handlePlant}
-                disabled={!text.trim()}
                 style={{
-                  flex:            1,
-                  backgroundColor: text.trim() ? '#C8F0DC' : '#F5DEB3',
-                  border:          `2px solid ${text.trim() ? '#81B89A' : '#D4A96A'}`,
-                  padding:         '8px 0',
-                  fontFamily:      '"Press Start 2P", monospace',
-                  fontSize:        '6px',
-                  color:           text.trim() ? '#2E6B4A' : '#C4A07A',
-                  cursor:          text.trim() ? 'pointer' : 'not-allowed',
-                  position:        'relative',
-                  transition:      'all 0.15s ease',
+                  flex: 1,
+                  backgroundColor: text.trim() ? '#C8F0DC' : '#F0EAE0',
+                  border: `2px solid ${text.trim() ? '#81B89A' : '#C8B898'}`,
+                  padding: '10px 0',
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '6px',
+                  color: text.trim() ? '#2E6B4A' : '#A89070',
+                  cursor: text.trim() ? 'pointer' : 'default',
+                  lineHeight: '1.8',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 plant it 🌱
               </button>
 
-              {/* Bukan Hustle */}
               <button
                 onClick={handleHustle}
                 style={{
-                  flex:            1,
+                  flex: 1,
                   backgroundColor: '#FFF0D8',
-                  border:          '2px solid #D4A96A',
-                  padding:         '8px 0',
-                  fontFamily:      '"Press Start 2P", monospace',
-                  fontSize:        '5px',
-                  color:           '#9B6B4A',
-                  cursor:          'pointer',
-                  lineHeight:      '1.8',
+                  border: '2px solid #D4A96A',
+                  padding: '10px 0',
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '5px',
+                  color: '#9B6B4A',
+                  cursor: 'pointer',
+                  lineHeight: '2',
                 }}
               >
                 bukan<br />hustle ☕
               </button>
             </div>
 
-            {/* Bukan Hustle message */}
             {hustleMsg && (
-              <div style={{
-                backgroundColor: '#FEF3E2',
-                border:          '1.5px solid #D4A96A',
-                padding:         '10px 12px',
-                animation:       'fadeIn 0.4s ease',
-              }}>
-                <p style={{
-                  fontFamily: '"Press Start 2P", monospace',
-                  fontSize:   '5px',
-                  color:      '#9B6B4A',
-                  margin:     0,
-                  lineHeight: '2.2',
-                  textAlign:  'center',
-                }}>
-                  it's okay to do nothing today.<br />
-                  your progress is safe. 🌿
+              <div style={{ backgroundColor: '#FEF3E2', border: '1.5px solid #D4A96A', padding: '10px 14px', animation: 'fadeIn 0.4s ease' }}>
+                <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#9B6B4A', margin: 0, lineHeight: '2.4', textAlign: 'center' }}>
+                  it's okay to do nothing today.<br />your progress is safe. 🌿
                 </p>
               </div>
             )}
           </>
         )}
 
-        {/* ── Recent wins ──────────────────────────────── */}
-        {recentWins.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <p style={{
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize:   '5px',
-              color:      '#C4A07A',
-              margin:     0,
-            }}>
+        {/* Recent wins */}
+        {recentWins.filter(e => e.mode === 'win' && e.text).length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#C4A07A', margin: 0 }}>
               recent wins
             </p>
-            {recentWins
-              .filter(e => e.mode === 'win' && e.text)
-              .slice(0, 3)
-              .map(entry => (
-                <div
-                  key={entry.key}
-                  style={{
-                    display:         'flex',
-                    alignItems:      'flex-start',
-                    gap:             '8px',
-                    padding:         '6px 8px',
-                    backgroundColor: 'rgba(200, 240, 220, 0.35)',
-                    borderLeft:      '2px solid #81B89A',
-                  }}
-                >
-                  <span style={{
-                    fontFamily: '"Press Start 2P", monospace',
-                    fontSize:   '4px',
-                    color:      '#C4A07A',
-                    flexShrink: 0,
-                    marginTop:  '2px',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {entry.key.slice(5)}  {/* MM-DD */}
-                  </span>
-                  <span style={{
-                    fontFamily: '"Nunito", sans-serif',
-                    fontSize:   '12px',
-                    color:      '#5C3D1E',
-                    lineHeight: '1.4',
-                  }}>
-                    {entry.text}
-                  </span>
-                </div>
-              ))
-            }
+            {recentWins.filter(e => e.mode === 'win' && e.text).slice(0, 3).map(entry => (
+              <div key={entry.key} style={{ display: 'flex', gap: '8px', padding: '6px 8px', backgroundColor: 'rgba(200,240,220,0.35)', borderLeft: '2px solid #81B89A' }}>
+                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '4px', color: '#C4A07A', flexShrink: 0, marginTop: '3px', whiteSpace: 'nowrap' }}>
+                  {entry.key.slice(5)}
+                </span>
+                <span style={{ fontFamily: '"Nunito", sans-serif', fontSize: '12px', color: '#5C3D1E', lineHeight: '1.4' }}>
+                  {entry.text}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
       </div>
 
-      {/* ── CSS animations ───────────────────────────────── */}
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(4px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes popIn {
-          from { opacity: 0; transform: scale(0.5); }
-          to   { opacity: 1; transform: scale(1); }
-        }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes popIn  { from { opacity:0; transform:scale(0.4); }      to { opacity:1; transform:scale(1); } }
       `}</style>
-
     </div>
   )
 }
