@@ -1,8 +1,9 @@
-// App.jsx
-// The root component. Handles:
-//   - Which page is currently visible (activePage state)
-//   - Mom Mode toggle (day vs sunset atmosphere)
-//   - The overall screen layout (top bar + page content + bottom nav)
+// App.jsx — Phase 2 update
+// Key change from Phase 1:
+//   - Added a `refreshKey` that increments each time the user
+//     navigates to a page. This forces GardenView and LogView
+//     to re-mount and re-read from LocalStorage, so a newly
+//     planted win shows up immediately when switching tabs.
 
 import { useState, useEffect } from 'react'
 import BottomNav    from './components/BottomNav'
@@ -29,74 +30,74 @@ const THEMES = {
 }
 
 export default function App() {
-  // ── State ───────────────────────────────────────────────────
-  const [activePage, setActivePage] = useState('garden')
-  const [momMode,    setMomMode]    = useState('day')    // 'day' | 'sunset'
+  const [activePage,  setActivePage]  = useState('garden')
+  const [momMode,     setMomMode]     = useState('day')
+  // refreshKey forces re-mount of the target page on tab switch
+  const [refreshKey,  setRefreshKey]  = useState(0)
 
-  // ── Load saved Mom Mode on first open ───────────────────────
   useEffect(() => {
-    const saved = loadMomMode()
-    setMomMode(saved)
+    setMomMode(loadMomMode())
   }, [])
 
-  // ── Toggle Mom Mode and save preference ─────────────────────
+  function handleNavigate(page) {
+    setActivePage(page)
+    // Bump the key so the new page re-mounts fresh
+    setRefreshKey(k => k + 1)
+  }
+
   function handleMomModeToggle() {
     const next = momMode === 'day' ? 'sunset' : 'day'
     setMomMode(next)
     saveMomMode(next)
   }
 
-  // ── Which page to render ─────────────────────────────────────
   function renderPage() {
     switch (activePage) {
-      case 'garden':   return <GardenView   momMode={momMode} />
-      case 'today':    return <TodayView    momMode={momMode} />
-      case 'calendar': return <CalendarView />
-      case 'log':      return <LogView />
-      default:         return <GardenView   momMode={momMode} />
+      case 'garden':
+        return <GardenView   key={refreshKey} momMode={momMode} />
+      case 'today':
+        return <TodayView    key={refreshKey} momMode={momMode} />
+      case 'calendar':
+        return <CalendarView key={refreshKey} />
+      case 'log':
+        return <LogView      key={refreshKey} />
+      default:
+        return <GardenView   key={refreshKey} momMode={momMode} />
     }
   }
 
   const theme = THEMES[momMode]
 
   return (
-    <div
-      style={{
-        // Full viewport, centred, max-width like a phone app
-        minHeight:       '100vh',
-        display:         'flex',
-        justifyContent:  'center',
-        alignItems:      'flex-start',
-        backgroundColor: '#EDE0D0',   // warm parchment page bg
-        padding:         '20px 16px',
-      }}
-    >
-      {/* ── App shell ────────────────────────────────────────── */}
-      <div
-        style={{
-          width:           '100%',
-          maxWidth:        '420px',
-          border:          `3px solid ${theme.border}`,
-          borderRadius:    '16px',
-          overflow:        'hidden',
-          backgroundColor: theme.skyBottom,
-          // 2000ms transition for Mom Mode atmosphere shift
-          transition: 'background-color 2000ms ease, border-color 2000ms ease',
-        }}
-      >
+    <div style={{
+      minHeight:       '100vh',
+      display:         'flex',
+      justifyContent:  'center',
+      alignItems:      'flex-start',
+      backgroundColor: '#EDE0D0',
+      padding:         '20px 16px',
+    }}>
+
+      {/* ── App shell ──────────────────────────────────────── */}
+      <div style={{
+        width:           '100%',
+        maxWidth:        '420px',
+        border:          `3px solid ${theme.border}`,
+        borderRadius:    '16px',
+        overflow:        'hidden',
+        backgroundColor: theme.skyBottom,
+        transition:      'background-color 2000ms ease, border-color 2000ms ease',
+      }}>
 
         {/* ── Top bar ──────────────────────────────────────── */}
-        <header
-          style={{
-            display:         'flex',
-            justifyContent:  'space-between',
-            alignItems:      'center',
-            padding:         '14px 18px 10px',
-            backgroundColor: theme.skyTop,
-            transition:      'background-color 2000ms ease',
-          }}
-        >
-          {/* App name */}
+        <header style={{
+          display:         'flex',
+          justifyContent:  'space-between',
+          alignItems:      'center',
+          padding:         '14px 18px 10px',
+          backgroundColor: theme.skyTop,
+          transition:      'background-color 2000ms ease',
+        }}>
           <div>
             <p style={{
               fontFamily: '"Press Start 2P", monospace',
@@ -109,7 +110,6 @@ export default function App() {
             </p>
           </div>
 
-          {/* Mom Mode toggle */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
             <span style={{
               fontFamily: '"Press Start 2P", monospace',
@@ -129,7 +129,6 @@ export default function App() {
                 padding:         '5px 8px',
                 cursor:          'pointer',
                 lineHeight:      '1.8',
-                position:        'relative',
               }}
             >
               mom mode
@@ -145,7 +144,7 @@ export default function App() {
         {/* ── Bottom nav ───────────────────────────────────── */}
         <BottomNav
           activePage={activePage}
-          onNavigate={setActivePage}
+          onNavigate={handleNavigate}
         />
 
       </div>
