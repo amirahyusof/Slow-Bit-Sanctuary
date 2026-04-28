@@ -77,22 +77,22 @@ function LogIcon({ active }) {
 const TABS = [
   {
     id:    'garden',
-    label: 'Garden',
+    label: 'garden',
     Icon:  GardenIcon,
   },
   {
     id:    'today',
-    label: 'Today',
+    label: 'today',
     Icon:  TodayIcon,
   },
   {
     id:    'calendar',
-    label: 'Calendar',
+    label: 'calendar',
     Icon:  CalendarIcon,
   },
   {
     id:    'log',
-    label: 'Log',
+    label: 'log',
     Icon:  LogIcon,
   },
 ]
@@ -134,7 +134,11 @@ export default function BottomNav({ activePage, onNavigate }) {
             <span
               style={{
                 fontFamily: '"Press Start 2P", monospace',
-                fontSize:   '5px',
+                // ↓ CHANGE THIS to make nav labels bigger or smaller.
+                // '5px' = very small (retro feel)
+                // '7px' = slightly more readable
+                // '8px' = comfortable reading size
+                fontSize:   '7px',
                 color:      isActive ? '#5C3D1E' : '#9B6B4A',
                 lineHeight: '1',
               }}
