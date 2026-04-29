@@ -1,9 +1,9 @@
-// TodayView.jsx — Phase 2 (fixed)
+// TodayView.jsx — Phase 2 (v3)
 //
 // Fixes:
-//   1. Bukan Hustle button is ALWAYS visible (not gated by input text)
-//   2. After planting, "already logged" card shows — no blank screen bug
-//   3. New character: pixel cat (loaf mode when resting)
+//   - Bukan Hustle button stays visible after pressing (shows dimmed/active state)
+//   - One win per day is intentional — UI now explains this warmly instead of hiding
+//   - Character is the original person, now with hair and a sage-green shirt
 
 import { useState, useEffect } from 'react'
 import {
@@ -17,13 +17,25 @@ import PixelPlant from './PixelPlant'
 const MAX_CHARS = 140
 
 // ─────────────────────────────────────────────────────────────
-// PIXEL CAT — standing or loaf (sitting)
+// PIXEL PERSON
+// Original person shape, now with:
+//   - Short wavy hair (dark brown)
+//   - Sage-green shirt instead of purple
+//   - Sitting pose when resting
 // ─────────────────────────────────────────────────────────────
-function PixelCat({ sitting = false, bouncing = false }) {
+function PixelPerson({ sitting = false, bouncing = false }) {
+  // Shirt colour — change this to customise
+  const SHIRT = '#7BAE8C'       // sage green
+  const SHIRT_DARK = '#5C9070'  // shirt shadow / arm shade
+  const HAIR  = '#5C3D1E'       // dark brown hair
+  const SKIN  = '#FFDAB9'
+  const PANTS = '#9090C0'
+  const SHOES = '#7B4F2E'
+
   return (
     <svg
-      width="48" height="52"
-      viewBox="0 0 48 52"
+      width="44" height="58"
+      viewBox="0 0 44 58"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{
@@ -33,79 +45,79 @@ function PixelCat({ sitting = false, bouncing = false }) {
         transition:     'transform 0.35s cubic-bezier(.36,1.56,.64,1)',
       }}
     >
-      {/* Ears */}
-      <rect x="10" y="0"  width="6"  height="8"  fill="#FFDAB9" />
-      <rect x="32" y="0"  width="6"  height="8"  fill="#FFDAB9" />
-      <rect x="11" y="1"  width="4"  height="5"  fill="#FFB3C6" />
-      <rect x="33" y="1"  width="4"  height="5"  fill="#FFB3C6" />
-      {/* Head */}
-      <rect x="8"  y="6"  width="32" height="20" fill="#FFDAB9" />
-      <rect x="6"  y="8"  width="2"  height="16" fill="#FFDAB9" />
-      <rect x="40" y="8"  width="2"  height="16" fill="#FFDAB9" />
-      {/* Open eyes (when not sitting) */}
+      {/* ── Hair ─────────────────────────────────────────── */}
+      {/* Top of hair */}
+      <rect x="14" y="0"  width="16" height="4"  fill={HAIR} />
+      {/* Hair sides */}
+      <rect x="12" y="2"  width="4"  height="8"  fill={HAIR} />
+      <rect x="28" y="2"  width="4"  height="6"  fill={HAIR} />
+      {/* Hair back / volume */}
+      <rect x="14" y="2"  width="16" height="6"  fill={HAIR} />
+      {/* Small wavy fringe detail */}
+      <rect x="16" y="6"  width="3"  height="2"  fill={HAIR} />
+      <rect x="22" y="5"  width="3"  height="3"  fill={HAIR} />
+
+      {/* ── Head ─────────────────────────────────────────── */}
+      <rect x="14" y="6"  width="16" height="12" fill={SKIN} />
+      {/* Head sides */}
+      <rect x="12" y="8"  width="2"  height="8"  fill={SKIN} />
+      <rect x="30" y="8"  width="2"  height="8"  fill={SKIN} />
+
+      {/* ── Eyes ─────────────────────────────────────────── */}
+      <rect x="16" y="10" width="4"  height="3"  fill="#3A2010" />
+      <rect x="24" y="10" width="4"  height="3"  fill="#3A2010" />
+      {/* Eye shine */}
+      <rect x="17" y="10" width="1"  height="1"  fill="#FFF8F0" />
+      <rect x="25" y="10" width="1"  height="1"  fill="#FFF8F0" />
+
+      {/* ── Smile ────────────────────────────────────────── */}
+      <rect x="17" y="15" width="10" height="2"  fill="#E07060" />
+      {/* Rosy cheeks */}
+      <rect x="14" y="14" width="3"  height="2"  fill="#FFB3C6" style={{ opacity: 0.6 }} />
+      <rect x="27" y="14" width="3"  height="2"  fill="#FFB3C6" style={{ opacity: 0.6 }} />
+
+      {/* ── Body / Shirt ─────────────────────────────────── */}
       {!sitting && (
         <>
-          <rect x="13" y="12" width="6"  height="5"  fill="#5C3D1E" />
-          <rect x="14" y="11" width="4"  height="1"  fill="#5C3D1E" />
-          <rect x="14" y="12" width="2"  height="2"  fill="#FFF8F0" />
-          <rect x="29" y="12" width="6"  height="5"  fill="#5C3D1E" />
-          <rect x="30" y="11" width="4"  height="1"  fill="#5C3D1E" />
-          <rect x="30" y="12" width="2"  height="2"  fill="#FFF8F0" />
+          <rect x="14" y="18" width="16" height="14" fill={SHIRT} />
+          {/* Shirt collar */}
+          <rect x="19" y="18" width="6"  height="3"  fill={SHIRT_DARK} />
+          {/* Arms */}
+          <rect x="8"  y="18" width="6"  height="10" fill={SHIRT} />
+          <rect x="30" y="18" width="6"  height="10" fill={SHIRT} />
+          {/* Hands */}
+          <rect x="8"  y="27" width="6"  height="4"  fill={SKIN} />
+          <rect x="30" y="27" width="6"  height="4"  fill={SKIN} />
+          {/* Legs */}
+          <rect x="16" y="32" width="6"  height="14" fill={PANTS} />
+          <rect x="24" y="32" width="6"  height="14" fill={PANTS} />
+          {/* Shoes */}
+          <rect x="14" y="44" width="8"  height="4"  fill={SHOES} />
+          <rect x="24" y="44" width="8"  height="4"  fill={SHOES} />
         </>
       )}
-      {/* Happy closed eyes (when sitting / loaf) */}
+
+      {/* ── Sitting pose ─────────────────────────────────── */}
       {sitting && (
         <>
-          <rect x="13" y="15" width="6"  height="2"  fill="#5C3D1E" />
-          <rect x="14" y="14" width="4"  height="1"  fill="#5C3D1E" />
-          <rect x="29" y="15" width="6"  height="2"  fill="#5C3D1E" />
-          <rect x="30" y="14" width="4"  height="1"  fill="#5C3D1E" />
-        </>
-      )}
-      {/* Nose */}
-      <rect x="22" y="18" width="4"  height="3"  fill="#FFB3C6" />
-      {/* Whiskers */}
-      <rect x="8"  y="19" width="8"  height="1"  fill="#C4A07A" />
-      <rect x="8"  y="21" width="8"  height="1"  fill="#C4A07A" />
-      <rect x="32" y="19" width="8"  height="1"  fill="#C4A07A" />
-      <rect x="32" y="21" width="8"  height="1"  fill="#C4A07A" />
-      {/* Mouth */}
-      <rect x="20" y="22" width="3"  height="2"  fill="#E07060" />
-      <rect x="25" y="22" width="3"  height="2"  fill="#E07060" />
-      <rect x="22" y="23" width="4"  height="1"  fill="#E07060" />
-
-      {/* Body */}
-      <rect x="12" y="26" width="24" height="14" fill="#C8A8E8" />
-      <rect x="18" y="27" width="12" height="10" fill="#FFE4F0" />
-
-      {/* Standing: arms + legs + tail up */}
-      {!sitting && (
-        <>
-          <rect x="6"  y="26" width="6"  height="8"  fill="#C8A8E8" />
-          <rect x="36" y="26" width="6"  height="8"  fill="#C8A8E8" />
-          <rect x="7"  y="33" width="4"  height="3"  fill="#FFDAB9" />
-          <rect x="37" y="33" width="4"  height="3"  fill="#FFDAB9" />
-          <rect x="15" y="40" width="7"  height="10" fill="#C8A8E8" />
-          <rect x="26" y="40" width="7"  height="10" fill="#C8A8E8" />
-          <rect x="13" y="48" width="9"  height="4"  fill="#FFDAB9" />
-          <rect x="26" y="48" width="9"  height="4"  fill="#FFDAB9" />
-          {/* Tail up */}
-          <rect x="36" y="28" width="4"  height="2"  fill="#FFDAB9" />
-          <rect x="38" y="24" width="2"  height="6"  fill="#FFDAB9" />
-          <rect x="40" y="22" width="4"  height="2"  fill="#FFDAB9" />
-        </>
-      )}
-
-      {/* Loaf cat: everything tucked, tail wraps front */}
-      {sitting && (
-        <>
-          <rect x="8"  y="36" width="8"  height="6"  fill="#C8A8E8" />
-          <rect x="32" y="36" width="8"  height="6"  fill="#C8A8E8" />
-          <rect x="12" y="40" width="24" height="8"  fill="#C8A8E8" />
-          <rect x="14" y="46" width="20" height="4"  fill="#FFDAB9" />
-          {/* Tail wraps around front */}
-          <rect x="4"  y="36" width="2"  height="6"  fill="#FFDAB9" />
-          <rect x="6"  y="40" width="4"  height="2"  fill="#FFDAB9" />
+          {/* Body */}
+          <rect x="14" y="18" width="16" height="12" fill={SHIRT} />
+          <rect x="19" y="18" width="6"  height="3"  fill={SHIRT_DARK} />
+          {/* Arms resting on knees */}
+          <rect x="8"  y="22" width="6"  height="6"  fill={SHIRT} />
+          <rect x="30" y="22" width="6"  height="6"  fill={SHIRT} />
+          {/* Hands on knees */}
+          <rect x="8"  y="28" width="7"  height="4"  fill={SKIN} />
+          <rect x="29" y="28" width="7"  height="4"  fill={SKIN} />
+          {/* Upper legs (horizontal when sitting) */}
+          <rect x="14" y="30" width="8"  height="6"  fill={PANTS} />
+          <rect x="22" y="30" width="8"  height="6"  fill={PANTS} />
+          {/* Lower legs (hanging down) */}
+          <rect x="10" y="36" width="8"  height="10" fill={PANTS} />
+          <rect x="26" y="36" width="8"  height="10" fill={PANTS} />
+          {/* Shoes */}
+          <rect x="8"  y="44" width="8"  height="4"  fill={SHOES} />
+          <rect x="28" y="44" width="8"  height="4"  fill={SHOES} />
         </>
       )}
     </svg>
@@ -162,8 +174,10 @@ export default function TodayView({ momMode }) {
   useEffect(() => {
     const entry = getTodayEntry()
     setTodayEntry(entry)
-    // If already rested today, show the cat in loaf mode
-    if (entry?.mode === 'rest') setIsSitting(true)
+    if (entry?.mode === 'rest') {
+      setIsSitting(true)
+      setHustleMsg(true)
+    }
     setRecentWins(getAllEntriesSorted().slice(0, 4))
   }, [])
 
@@ -196,6 +210,7 @@ export default function TodayView({ momMode }) {
   }
 
   function handleInputFocus() {
+    // If they clicked Hustle but haven't saved yet, let them come back
     if (isSitting && !todayEntry) {
       setIsSitting(false)
       setHustleMsg(false)
@@ -204,79 +219,171 @@ export default function TodayView({ momMode }) {
 
   const charsLeft     = MAX_CHARS - text.length
   const alreadyLogged = !!todayEntry
+  const isWin         = todayEntry?.mode === 'win'
+  const isRest        = todayEntry?.mode === 'rest'
+
   const skyBg = momMode === 'sunset'
     ? 'linear-gradient(180deg, #FF9A5C 0%, #FFD580 100%)'
     : 'linear-gradient(180deg, #FDE8C8 0%, #FFF8F0 100%)'
 
+  // ── Render ─────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Scene ────────────────────────────────────────── */}
+      {/* ── Scene area ───────────────────────────────────── */}
       <div style={{
         background:     skyBg,
         transition:     'background 2000ms ease',
-        minHeight:      '120px',
+        minHeight:      '130px',
         display:        'flex',
         alignItems:     'flex-end',
         justifyContent: 'center',
         gap:            '16px',
         padding:        '12px 20px 10px',
       }}>
-        <PixelCat sitting={isSitting || (alreadyLogged && todayEntry?.mode === 'win')} bouncing={isBouncing} />
+        <PixelPerson
+          sitting={isSitting || isWin}
+          bouncing={isBouncing}
+        />
         <div style={{ marginBottom: '6px' }}>
           <WateringCan tipped={isTipped} />
         </div>
         {justPlanted && todayEntry && (
           <div style={{ marginBottom: '2px', animation: 'popIn 0.4s ease' }}>
-            <PixelPlant flowerType={todayEntry.flower || 'pink-dahlia'} growthStage={0} size={1.1} />
+            <PixelPlant
+              flowerType={todayEntry.flower || 'pink-dahlia'}
+              growthStage={0}
+              size={1.1}
+            />
           </div>
         )}
       </div>
 
-      {/* ── Interaction ──────────────────────────────────── */}
-      <div style={{ padding: '14px 18px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* ── Interaction area ─────────────────────────────── */}
+      <div style={{
+        padding:       '14px 18px 20px',
+        display:       'flex',
+        flexDirection: 'column',
+        gap:           '12px',
+      }}>
 
-        {/* Already logged — WIN */}
-        {alreadyLogged && todayEntry.mode === 'win' && (
+        {/* ══════════════════════════════════════════════════
+            STATE A: Logged a WIN today
+            Show the win card + a warm "one per day" note.
+            Bukan Hustle is hidden (no longer relevant).
+        ══════════════════════════════════════════════════ */}
+        {isWin && (
           <div style={{
             backgroundColor: 'rgba(200,240,220,0.45)',
             border:          '2px solid #81B89A',
             padding:         '12px 14px',
             animation:       'fadeIn 0.4s ease',
           }}>
-            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#3B6D11', margin: '0 0 8px', lineHeight: '2' }}>
+            <p style={{
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize:   '5px', color: '#3B6D11',
+              margin: '0 0 8px', lineHeight: '2',
+            }}>
               ✦ today's win is planted
             </p>
-            <p style={{ fontFamily: '"Nunito", sans-serif', fontSize: '14px', color: '#5C3D1E', margin: '0 0 8px', lineHeight: '1.5' }}>
+            <p style={{
+              fontFamily: '"Nunito", sans-serif',
+              fontSize: '14px', color: '#5C3D1E',
+              margin: '0 0 10px', lineHeight: '1.5',
+            }}>
               "{todayEntry.text}"
             </p>
-            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '4px', color: '#81B89A', margin: 0 }}>
-              come back tomorrow 🌱
-            </p>
+            {/* One-per-day explanation — warm, not punishing */}
+            <div style={{
+              backgroundColor: 'rgba(255,248,240,0.8)',
+              border:          '1px dashed #D4A96A',
+              padding:         '7px 10px',
+              marginBottom:    '4px',
+            }}>
+              <p style={{
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize:   '4px', color: '#A0785A',
+                margin: 0, lineHeight: '2.2',
+              }}>
+                one win a day is enough. 🌱<br />
+                your garden grows slowly,<br />
+                just like real life.<br />
+                come back tomorrow!
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Already logged — REST */}
-        {alreadyLogged && todayEntry.mode === 'rest' && (
+        {/* ══════════════════════════════════════════════════
+            STATE B: Took a REST today
+            Show rest card + keep Bukan Hustle visible
+            (dimmed so they know it was pressed).
+        ══════════════════════════════════════════════════ */}
+        {isRest && (
           <div style={{
-            backgroundColor: 'rgba(255,240,210,0.7)',
+            backgroundColor: '#FEF3E2',
             border:          '2px solid #D4A96A',
             padding:         '12px 14px',
             animation:       'fadeIn 0.4s ease',
           }}>
-            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#9B6B4A', margin: 0, lineHeight: '2.2' }}>
-              resting today. ☕<br />your progress is safe.
+            <p style={{
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize:   '5px', color: '#9B6B4A',
+              margin: '0 0 6px', lineHeight: '2.2',
+            }}>
+              it's okay to do nothing today.
+            </p>
+            <p style={{
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize:   '4px', color: '#C4A07A',
+              margin: 0, lineHeight: '2.2',
+            }}>
+              your progress is safe. 🌿<br />
+              rest days are part of the garden.
             </p>
           </div>
         )}
 
-        {/* Nothing logged yet — show input + BOTH buttons */}
+        {/* Bukan Hustle — visible whenever no WIN is logged.
+            Before press: clickable peach button.
+            After press (isRest): stays visible, darker, shows active state.
+            This fixes the "button disappears after pressing" bug. */}
+        {!isWin && (
+          <button
+            onClick={!isRest ? handleHustle : undefined}
+            style={{
+              width:           '100%',
+              backgroundColor: isRest ? '#FFE4B8' : '#FFF0D8',
+              border:          `2px solid ${isRest ? '#C8984A' : '#D4A96A'}`,
+              padding:         '10px 0',
+              fontFamily:      '"Press Start 2P", monospace',
+              fontSize:        '5px',
+              color:           isRest ? '#7B4F2E' : '#9B6B4A',
+              cursor:          isRest ? 'default' : 'pointer',
+              lineHeight:      '2',
+              transition:      'all 0.2s ease',
+            }}
+          >
+            {isRest ? '☕ resting today — bukan hustle' : 'bukan hustle ☕'}
+          </button>
+        )}
+
+        {/* ══════════════════════════════════════════════════
+            STATE C: Nothing logged yet
+            Show input + Plant It + Bukan Hustle buttons.
+            Bukan Hustle is ALWAYS clickable here.
+        ══════════════════════════════════════════════════ */}
         {!alreadyLogged && (
           <>
-            <p style={{ fontFamily: '"Nunito", sans-serif', fontSize: '13px', color: '#9B6B4A', margin: 0, lineHeight: '1.6' }}>
+            <p style={{
+              fontFamily: '"Nunito", sans-serif',
+              fontSize:   '13px', color: '#9B6B4A',
+              margin: 0, lineHeight: '1.6',
+            }}>
               what is one small thing you did for yourself or your work today?
             </p>
 
+            {/* Text input */}
             <div style={{ position: 'relative' }}>
               <textarea
                 value={text}
@@ -287,90 +394,105 @@ export default function TodayView({ momMode }) {
                 style={{
                   width: '100%', background: '#FFF8F0',
                   border: '2px solid #D4A96A', borderRadius: '0',
-                  padding: '8px 10px 20px', fontFamily: '"Nunito", sans-serif',
+                  padding: '8px 10px 22px',
+                  fontFamily: '"Nunito", sans-serif',
                   fontSize: '13px', color: '#5C3D1E',
-                  outline: 'none', resize: 'none', lineHeight: '1.5', display: 'block',
+                  outline: 'none', resize: 'none',
+                  lineHeight: '1.5', display: 'block',
                 }}
-                onKeyDown={e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handlePlant() }}
+                onKeyDown={e => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handlePlant()
+                }}
               />
-              <span style={{ position: 'absolute', bottom: '6px', right: '8px', fontFamily: '"Press Start 2P", monospace', fontSize: '4px', color: charsLeft < 20 ? '#E07060' : '#C4A07A' }}>
+              <span style={{
+                position: 'absolute', bottom: '6px', right: '8px',
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: '4px',
+                color: charsLeft < 20 ? '#E07060' : '#C4A07A',
+              }}>
                 {charsLeft}
               </span>
             </div>
 
-            {/* BOTH buttons — always rendered */}
+            {/* Action buttons — rendered ALWAYS in this state */}
             <div style={{ display: 'flex', gap: '8px' }}>
+
+              {/* Plant It — lights up when there's text */}
               <button
                 onClick={handlePlant}
                 style={{
-                  flex: 1,
+                  flex:            1,
                   backgroundColor: text.trim() ? '#C8F0DC' : '#F0EAE0',
-                  border: `2px solid ${text.trim() ? '#81B89A' : '#C8B898'}`,
-                  padding: '10px 0',
-                  fontFamily: '"Press Start 2P", monospace',
-                  fontSize: '6px',
-                  color: text.trim() ? '#2E6B4A' : '#A89070',
-                  cursor: text.trim() ? 'pointer' : 'default',
-                  lineHeight: '1.8',
-                  transition: 'all 0.2s ease',
+                  border:          `2px solid ${text.trim() ? '#81B89A' : '#C8B898'}`,
+                  padding:         '10px 0',
+                  fontFamily:      '"Press Start 2P", monospace',
+                  fontSize:        '6px',
+                  color:           text.trim() ? '#2E6B4A' : '#A89070',
+                  cursor:          text.trim() ? 'pointer' : 'default',
+                  lineHeight:      '1.8',
+                  transition:      'all 0.2s ease',
                 }}
               >
                 plant it 🌱
               </button>
 
-              <button
-                onClick={handleHustle}
-                style={{
-                  flex: 1,
-                  backgroundColor: '#FFF0D8',
-                  border: '2px solid #D4A96A',
-                  padding: '10px 0',
-                  fontFamily: '"Press Start 2P", monospace',
-                  fontSize: '5px',
-                  color: '#9B6B4A',
-                  cursor: 'pointer',
-                  lineHeight: '2',
-                }}
-              >
-                bukan<br />hustle ☕
-              </button>
             </div>
-
-            {hustleMsg && (
-              <div style={{ backgroundColor: '#FEF3E2', border: '1.5px solid #D4A96A', padding: '10px 14px', animation: 'fadeIn 0.4s ease' }}>
-                <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#9B6B4A', margin: 0, lineHeight: '2.4', textAlign: 'center' }}>
-                  it's okay to do nothing today.<br />your progress is safe. 🌿
-                </p>
-              </div>
-            )}
           </>
         )}
 
-        {/* Recent wins */}
+        {/* ── Recent wins — always at the bottom ───────── */}
         {recentWins.filter(e => e.mode === 'win' && e.text).length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
-            <p style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '5px', color: '#C4A07A', margin: 0 }}>
+          <div style={{
+            display: 'flex', flexDirection: 'column',
+            gap: '6px', marginTop: '4px',
+          }}>
+            <p style={{
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize: '5px', color: '#C4A07A', margin: 0,
+            }}>
               recent wins
             </p>
-            {recentWins.filter(e => e.mode === 'win' && e.text).slice(0, 3).map(entry => (
-              <div key={entry.key} style={{ display: 'flex', gap: '8px', padding: '6px 8px', backgroundColor: 'rgba(200,240,220,0.35)', borderLeft: '2px solid #81B89A' }}>
-                <span style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '4px', color: '#C4A07A', flexShrink: 0, marginTop: '3px', whiteSpace: 'nowrap' }}>
-                  {entry.key.slice(5)}
-                </span>
-                <span style={{ fontFamily: '"Nunito", sans-serif', fontSize: '12px', color: '#5C3D1E', lineHeight: '1.4' }}>
-                  {entry.text}
-                </span>
-              </div>
-            ))}
+            {recentWins
+              .filter(e => e.mode === 'win' && e.text)
+              .slice(0, 3)
+              .map(entry => (
+                <div key={entry.key} style={{
+                  display: 'flex', gap: '8px',
+                  padding: '6px 8px',
+                  backgroundColor: 'rgba(200,240,220,0.35)',
+                  borderLeft: '2px solid #81B89A',
+                }}>
+                  <span style={{
+                    fontFamily: '"Press Start 2P", monospace',
+                    fontSize: '4px', color: '#C4A07A',
+                    flexShrink: 0, marginTop: '3px', whiteSpace: 'nowrap',
+                  }}>
+                    {entry.key.slice(5)}
+                  </span>
+                  <span style={{
+                    fontFamily: '"Nunito", sans-serif',
+                    fontSize: '12px', color: '#5C3D1E', lineHeight: '1.4',
+                  }}>
+                    {entry.text}
+                  </span>
+                </div>
+              ))}
           </div>
         )}
 
       </div>
 
       <style>{`
-        @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes popIn  { from { opacity:0; transform:scale(0.4); }      to { opacity:1; transform:scale(1); } }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.4); }
+          to   { opacity: 1; transform: scale(1); }
+        }
       `}</style>
+
     </div>
   )
 }
