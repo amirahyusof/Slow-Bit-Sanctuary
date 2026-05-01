@@ -1,61 +1,97 @@
-/* ── Google Fonts ──────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700&display=swap');
+/* ── Google Fonts — Watercolor Theme ──────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Indie+Flower&family=Nunito:wght@400;600;700&display=swap');
 
 /* ── Tailwind ──────────────────────────────────────────────── */
 @import "tailwindcss";
 
-/* ── Base resets ───────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+/* ── Base reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; padding: 0; }
 
 body {
   font-family: 'Nunito', sans-serif;
-  background-color: #EDE0D0;  /* warm parchment page background */
+  background-color: #EDE4D8;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Pixel rendering for all SVGs ──────────────────────────── */
-svg {
-  image-rendering: pixelated;
+/* ── CSS variables — watercolor palette ───────────────────── */
+:root {
+  --parchment:    #FDFBF7;
+  --cream:        #FFF8F0;
+  --sage:         #8DAA91;
+  --sage-light:   #B8D4BC;
+  --sage-dark:    #5C8C64;
+  --terracotta:   #C2A38A;
+  --terracotta-dk:#9C7A5C;
+  --dusty-rose:   #F4B8C8;
+  --lavender:     #C9B8D8;
+  --peach:        #F4D4B8;
+  --marigold:     #F4C87C;
+  --mint:         #B8E8D0;
+  --text-dark:    #4A3728;
+  --text-mid:     #7A5C44;
+  --text-light:   #A88C74;
+  --border:       #D4BCA8;
+
+  --font-heading:     'Lora', Georgia, serif;
+  --font-handwritten: 'Indie Flower', cursive;
+  --font-body:        'Nunito', sans-serif;
 }
 
 /* ── Mom Mode transition ───────────────────────────────────── */
-/* Applied to the main app wrapper so the whole screen shifts */
-.mom-mode-transition {
-  transition: background-color 2000ms ease, border-color 2000ms ease;
+.mood-transition {
+  transition: background 2000ms ease, border-color 2000ms ease;
 }
 
-/* ── Pixel button 3D shadow effect ────────────────────────── */
-/* Gives retro buttons the classic drop-shadow look */
-.pixel-shadow {
-  position: relative;
-}
-.pixel-shadow::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 100%;
-  height: 100%;
-  background: #D4A96A;
-  z-index: -1;
+/* ── Watercolor card style ─────────────────────────────────── */
+.wc-card {
+  background: rgba(253, 251, 247, 0.9);
+  border: 1.5px solid #D4BCA8;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(139, 94, 46, 0.08);
 }
 
-/* ── Scrollbar styling (subtle) ────────────────────────────── */
-::-webkit-scrollbar {
-  width: 4px;
+/* ── Soft button style ─────────────────────────────────────── */
+.wc-btn {
+  border-radius: 12px;
+  font-family: 'Indie Flower', cursive;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(139, 94, 46, 0.12);
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+.wc-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(139,94,46,0.16); }
+.wc-btn:active { transform: translateY(0); }
+
+/* ── Floating animation for plants ────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-4px) rotate(0.8deg); }
+  66%       { transform: translateY(-2px) rotate(-0.8deg); }
 }
-::-webkit-scrollbar-thumb {
-  background: #D4A96A;
-  border-radius: 2px;
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(2deg); }
 }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.5) rotate(-5deg); }
+  70%  { transform: scale(1.1) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes bloom {
+  0%   { opacity: 0; transform: scale(0.3); }
+  60%  { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #C2A38A; border-radius: 2px; }

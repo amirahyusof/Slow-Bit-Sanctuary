@@ -1,9 +1,4 @@
-// App.jsx — Phase 2 update
-// Key change from Phase 1:
-//   - Added a `refreshKey` that increments each time the user
-//     navigates to a page. This forces GardenView and LogView
-//     to re-mount and re-read from LocalStorage, so a newly
-//     planted win shows up immediately when switching tabs.
+// App.jsx — Watercolor Theme
 
 import { useState, useEffect } from 'react'
 import BottomNav    from './components/BottomNav'
@@ -13,35 +8,30 @@ import CalendarView from './components/CalendarView'
 import LogView      from './components/LogView'
 import { saveMomMode, loadMomMode } from './utils/storage'
 
-// ── Mom Mode colour themes ────────────────────────────────────
 const THEMES = {
   day: {
-    skyTop:    '#FDE8C8',
-    skyBottom: '#FFF0E0',
-    border:    '#E8C99A',
-    label:     '☀ bright day',
+    bg:       '#FDE8D0',
+    shell:    '#FFF8F0',
+    border:   '#D4BCA8',
+    label:    '☀ bright day',
   },
   sunset: {
-    skyTop:    '#FF9A5C',
-    skyBottom: '#FFD580',
-    border:    '#E07030',
-    label:     '✦ warm sunset',
+    bg:       '#F4A87C',
+    shell:    '#FFF0DC',
+    border:   '#C8784A',
+    label:    '✦ warm sunset',
   },
 }
 
 export default function App() {
-  const [activePage,  setActivePage]  = useState('garden')
-  const [momMode,     setMomMode]     = useState('day')
-  // refreshKey forces re-mount of the target page on tab switch
-  const [refreshKey,  setRefreshKey]  = useState(0)
+  const [activePage, setActivePage] = useState('garden')
+  const [momMode,    setMomMode]    = useState('day')
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  useEffect(() => {
-    setMomMode(loadMomMode())
-  }, [])
+  useEffect(() => { setMomMode(loadMomMode()) }, [])
 
   function handleNavigate(page) {
     setActivePage(page)
-    // Bump the key so the new page re-mounts fresh
     setRefreshKey(k => k + 1)
   }
 
@@ -53,16 +43,11 @@ export default function App() {
 
   function renderPage() {
     switch (activePage) {
-      case 'garden':
-        return <GardenView   key={refreshKey} momMode={momMode} />
-      case 'today':
-        return <TodayView    key={refreshKey} momMode={momMode} />
-      case 'calendar':
-        return <CalendarView key={refreshKey} />
-      case 'log':
-        return <LogView      key={refreshKey} />
-      default:
-        return <GardenView   key={refreshKey} momMode={momMode} />
+      case 'garden':   return <GardenView   key={refreshKey} momMode={momMode} />
+      case 'today':    return <TodayView    key={refreshKey} momMode={momMode} />
+      case 'calendar': return <CalendarView key={refreshKey} />
+      case 'log':      return <LogView      key={refreshKey} />
+      default:         return <GardenView   key={refreshKey} momMode={momMode} />
     }
   }
 
@@ -74,79 +59,84 @@ export default function App() {
       display:         'flex',
       justifyContent:  'center',
       alignItems:      'flex-start',
-      backgroundColor: '#EDE0D0',
-      padding:         '20px 16px',
+      backgroundColor: '#EDE4D8',
+      padding:         '24px 16px',
     }}>
-
-      {/* ── App shell ──────────────────────────────────────── */}
       <div style={{
         width:           '100%',
         maxWidth:        '420px',
-        border:          `3px solid ${theme.border}`,
-        borderRadius:    '16px',
+        border:          `2px solid ${theme.border}`,
+        borderRadius:    '24px',
         overflow:        'hidden',
-        backgroundColor: theme.skyBottom,
+        backgroundColor: theme.shell,
+        boxShadow:       '0 4px 24px rgba(139,94,46,0.12)',
         transition:      'background-color 2000ms ease, border-color 2000ms ease',
       }}>
 
-        {/* ── Top bar ──────────────────────────────────────── */}
+        {/* Top bar */}
         <header style={{
           display:         'flex',
           justifyContent:  'space-between',
           alignItems:      'center',
-          padding:         '14px 18px 10px',
-          backgroundColor: theme.skyTop,
+          padding:         '16px 20px 12px',
+          backgroundColor: theme.bg,
           transition:      'background-color 2000ms ease',
         }}>
           <div>
             <p style={{
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize:   '7px',
-              color:      '#7B4F2E',
-              lineHeight: '1.8',
+              fontFamily: '"Lora", Georgia, serif',
+              fontSize:   '14px',
+              color:      '#4A3728',
+              margin:     '0 0 2px',
+              fontStyle:  'italic',
+            }}>
+              the
+            </p>
+            <p style={{
+              fontFamily: '"Lora", Georgia, serif',
+              fontSize:   '17px',
+              fontWeight: '600',
+              color:      '#4A3728',
               margin:     0,
             }}>
-              slow-bit<br />sanctuary
+              Slow-Bit Sanctuary
             </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
             <span style={{
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize:   '4px',
-              color:      '#9B6B4A',
+              fontFamily: '"Indie Flower", cursive',
+              fontSize:   '11px',
+              color:      '#A88C74',
             }}>
               {theme.label}
             </span>
             <button
               onClick={handleMomModeToggle}
               style={{
-                fontFamily:      '"Press Start 2P", monospace',
-                fontSize:        '5px',
-                color:           '#7B4F2E',
-                backgroundColor: '#FFF0D8',
-                border:          '2px solid #D4A96A',
-                padding:         '5px 8px',
+                fontFamily:      '"Indie Flower", cursive',
+                fontSize:        '16px',
+                color:           '#7A5C44',
+                backgroundColor: 'rgba(253,251,247,0.8)',
+                border:          '1.5px solid #D4BCA8',
+                borderRadius:    '20px',
+                padding:         '4px 12px',
                 cursor:          'pointer',
-                lineHeight:      '1.8',
+                boxShadow:       '0 1px 4px rgba(139,94,46,0.1)',
               }}
             >
-              mom mode
+              Mom Mode
             </button>
           </div>
         </header>
 
-        {/* ── Page content ─────────────────────────────────── */}
+        {/* Page */}
         <main style={{ minHeight: '480px' }}>
           {renderPage()}
         </main>
 
-        {/* ── Bottom nav ───────────────────────────────────── */}
-        <BottomNav
-          activePage={activePage}
-          onNavigate={handleNavigate}
-        />
-
+        {/* Nav */}
+        <BottomNav activePage={activePage} onNavigate={handleNavigate} />
       </div>
     </div>
   )

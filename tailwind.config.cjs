@@ -1,60 +1,47 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        // ── Sky / Background colours ──────────────────
+        'parchment':      '#FDFBF7',
         'cream':          '#FFF8F0',
-        'peach':          '#FFD6B3',
-        'sunset-sky':     '#FF9A5C',
-        'sunset-warm':    '#FFB347',
-
-        // ── Plant / Garden colours ────────────────────
-        'mint':           '#C8F0DC',
-        'mint-dark':      '#81B89A',
-        'sage':           '#81B89A',
-        'leaf':           '#81C784',
-        'leaf-light':     '#A5D6A7',
-
-        // ── Soil colours (dry → rich) ─────────────────
-        'soil-0':         '#F5DEB3',   // dry / new
-        'soil-1':         '#D4A96A',   // slightly tended
-        'soil-2':         '#B8884A',   // well tended
-        'soil-3':         '#8B5E2E',   // rich / dark
-
-        // ── Flower colours ────────────────────────────
-        'pixel-pink':     '#FFB3C6',   // pink dahlia
-        'pixel-purple':   '#C8A8E8',   // lavender tulip
-        'pixel-peach':    '#FFD6B3',   // peach rose
-        'pixel-orange':   '#FF9A5C',   // sunset marigold
-
-        // ── UI / Text colours ─────────────────────────
-        'lavender':       '#E8D5F5',
-        'text-dark':      '#5C3D1E',
-        'text-mid':       '#9B6B4A',
-        'text-light':     '#C4A07A',
-        'border-soil':    '#D4A96A',
+        'sage':           '#8DAA91',
+        'sage-light':     '#B8D4BC',
+        'sage-dark':      '#5C8C64',
+        'terracotta':     '#C2A38A',
+        'terracotta-dk':  '#9C7A5C',
+        'dusty-rose':     '#F4B8C8',
+        'wc-lavender':    '#C9B8D8',
+        'wc-peach':       '#F4D4B8',
+        'marigold':       '#F4C87C',
+        'wc-mint':        '#B8E8D0',
+        'text-dark':      '#4A3728',
+        'text-mid':       '#7A5C44',
+        'text-light':     '#A88C74',
+        'wc-border':      '#D4BCA8',
+        // Mom Mode skies
+        'sky-day-top':    '#FDE8D0',
+        'sky-day-btm':    '#FFF8F0',
+        'sky-sunset-top': '#F4A87C',
+        'sky-sunset-btm': '#F4D4A0',
       },
-
       fontFamily: {
-        // Pixel font for titles and buttons
-        'pixel': ['"Press Start 2P"', 'monospace'],
-        // Soft round font for body text and inputs
-        'sans':  ['"Nunito"', 'sans-serif'],
+        'heading':     ['"Lora"', 'Georgia', 'serif'],
+        'handwritten': ['"Indie Flower"', 'cursive'],
+        'sans':        ['"Nunito"', 'sans-serif'],
       },
-
-      // Slow transition for Mom Mode atmosphere shift
+      borderRadius: {
+        'xl':  '12px',
+        '2xl': '16px',
+        '3xl': '24px',
+      },
+      boxShadow: {
+        'wc':    '0 2px 12px rgba(139,94,46,0.08)',
+        'wc-md': '0 4px 20px rgba(139,94,46,0.12)',
+      },
       transitionDuration: {
         'mood': '2000ms',
-      },
-
-      // Pixel-perfect image rendering utility
-      imageRendering: {
-        'pixelated': 'pixelated',
       },
     },
   },
