@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAllEntriesSorted, formatDate } from '../utils/storage'
-import PixelPlant, { getGrowthStage } from './PixelPlant'
+import WatercolorPlant, { getGrowthStage } from './WatercolorPlant'
 
 // ── Flower display name map ───────────────────────────────────
 const FLOWER_NAMES = {
