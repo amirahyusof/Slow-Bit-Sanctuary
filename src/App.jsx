@@ -59,7 +59,7 @@ export default function App() {
       display:         'flex',
       justifyContent:  'center',
       alignItems:      'flex-start',
-      backgroundColor: '#EDE4D8',
+      backgroundColor: 'bg-dusty-rose',
       padding:         '24px 16px',
     }}>
       <div style={{
