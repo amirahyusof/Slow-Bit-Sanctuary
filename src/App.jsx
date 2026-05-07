@@ -1,11 +1,12 @@
-// App.jsx — Watercolor Theme
+// App.jsx — Responsive Layout (Priority 3)
+// Desktop-first: 2-column on 1200px+, single column on mobile
 
 import { useState, useEffect } from 'react'
-import BottomNav    from './components/BottomNav'
-import GardenView   from './components/GardenView'
-import TodayView    from './components/TodayView'
+import BottomNav from './components/BottomNav'
+import GardenView from './components/GardenView'
+import TodayView from './components/TodayView'
 import CalendarView from './components/CalendarView'
-import LogView      from './components/LogView'
+import LogView from './components/LogView'
 import { saveMomMode, loadMomMode } from './utils/storage'
 
 const THEMES = {
@@ -13,7 +14,7 @@ const THEMES = {
     bg:       '#FDE8D0',
     shell:    '#FFF8F0',
     border:   '#D4BCA8',
-    label:    '☀ bright day',
+    label:    '☀️ bright day',
   },
   sunset: {
     bg:       '#F4A87C',
@@ -25,10 +26,21 @@ const THEMES = {
 
 export default function App() {
   const [activePage, setActivePage] = useState('garden')
-  const [momMode,    setMomMode]    = useState('day')
+  const [momMode, setMomMode] = useState('day')
   const [refreshKey, setRefreshKey] = useState(0)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
-  useEffect(() => { setMomMode(loadMomMode()) }, [])
+  // Load Mom Mode from storage
+  useEffect(() => {
+    setMomMode(loadMomMode())
+  }, [])
+
+  // Track window width for responsive layout
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   function handleNavigate(page) {
     setActivePage(page)
@@ -53,39 +65,50 @@ export default function App() {
 
   const theme = THEMES[momMode]
 
+  // Responsive breakpoints
+  const isMobile = windowWidth < 768
+  const isTablet = windowWidth >= 768 && windowWidth < 1200
+  const isDesktop = windowWidth >= 1200
+
   return (
     <div style={{
       minHeight:       '100vh',
       display:         'flex',
       justifyContent:  'center',
       alignItems:      'flex-start',
-      backgroundColor: 'bg-dusty-rose',
-      padding:         '24px 16px',
+      backgroundColor: '#EDE4D8',
+      padding:         isMobile ? '8px' : isTablet ? '12px' : '24px',
     }}>
       <div style={{
-        width:           '100%',
-        maxWidth:        '420px',
+        width:           isMobile ? '100%' : isTablet ? '95%' : '100%',
+        maxWidth:        isDesktop ? '1400px' : 'none',
         border:          `2px solid ${theme.border}`,
-        borderRadius:    '24px',
+        borderRadius:    isMobile ? '12px' : '24px',
         overflow:        'hidden',
         backgroundColor: theme.shell,
-        boxShadow:       '0 4px 24px rgba(139,94,46,0.12)',
+        boxShadow:       isMobile ? '0 2px 12px rgba(139,94,46,0.08)' : '0 4px 24px rgba(139,94,46,0.12)',
         transition:      'background-color 2000ms ease, border-color 2000ms ease',
+        display:         'flex',
+        flexDirection:   'column',
+        height:          '100vh',
+        maxHeight:       '100vh',
       }}>
 
-        {/* Top bar */}
+        {/* ── Top bar ──────────────────────────────────── */}
         <header style={{
           display:         'flex',
           justifyContent:  'space-between',
           alignItems:      'center',
-          padding:         '16px 20px 12px',
+          padding:         isMobile ? '12px 16px' : isTablet ? '14px 18px' : '16px 20px',
           backgroundColor: theme.bg,
           transition:      'background-color 2000ms ease',
+          flexShrink:      0,
+          borderBottom:    `1px solid ${theme.border}`,
         }}>
           <div>
             <p style={{
               fontFamily: '"Lora", Georgia, serif',
-              fontSize:   '14px',
+              fontSize:   isMobile ? '11px' : isTablet ? '12px' : '14px',
               color:      '#4A3728',
               margin:     '0 0 2px',
               fontStyle:  'italic',
@@ -94,7 +117,7 @@ export default function App() {
             </p>
             <p style={{
               fontFamily: '"Lora", Georgia, serif',
-              fontSize:   '17px',
+              fontSize:   isMobile ? '15px' : isTablet ? '16px' : '17px',
               fontWeight: '600',
               color:      '#4A3728',
               margin:     0,
@@ -103,10 +126,15 @@ export default function App() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          <div style={{
+            display:       'flex',
+            flexDirection: 'column',
+            alignItems:    'flex-end',
+            gap:           '4px',
+          }}>
             <span style={{
               fontFamily: '"Indie Flower", cursive',
-              fontSize:   '11px',
+              fontSize:   isMobile ? '9px' : isTablet ? '10px' : '11px',
               color:      '#A88C74',
             }}>
               {theme.label}
@@ -115,14 +143,15 @@ export default function App() {
               onClick={handleMomModeToggle}
               style={{
                 fontFamily:      '"Indie Flower", cursive',
-                fontSize:        '16px',
+                fontSize:        isMobile ? '13px' : isTablet ? '14px' : '16px',
                 color:           '#7A5C44',
                 backgroundColor: 'rgba(253,251,247,0.8)',
-                border:          '1.5px solid #D4BCA8',
+                border:          `1.5px solid ${theme.border}`,
                 borderRadius:    '20px',
-                padding:         '4px 12px',
+                padding:         isMobile ? '3px 10px' : '4px 12px',
                 cursor:          'pointer',
                 boxShadow:       '0 1px 4px rgba(139,94,46,0.1)',
+                transition:      'all 0.2s ease',
               }}
             >
               Mom Mode
@@ -130,13 +159,19 @@ export default function App() {
           </div>
         </header>
 
-        {/* Page */}
-        <main style={{ minHeight: '480px' }}>
+        {/* ── Main content (scrollable) ──────────────────── */}
+        <main style={{
+          flex:       1,
+          overflowY:  'auto',
+          overflowX:  'hidden',
+          padding:    isMobile ? '0' : isTablet ? '0' : isDesktop ? '16px' : '0',
+        }}>
           {renderPage()}
         </main>
 
-        {/* Nav */}
-        <BottomNav activePage={activePage} onNavigate={handleNavigate} />
+        {/* ── Bottom nav ────────────────────────────────── */}
+        <BottomNav activePage={activePage} onNavigate={handleNavigate} isMobile={isMobile} />
+
       </div>
     </div>
   )
