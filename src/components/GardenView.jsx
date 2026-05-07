@@ -343,7 +343,7 @@ function FloralGrid({ entries }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '12px',
+              fontSize: '20px',
               fontWeight: '500',
               background: entry
                 ? entry.mode === 'rest'
