@@ -1,16 +1,15 @@
 // CalendarView.jsx — Phase 3: Complete Calendar Implementation
-// Shows a month grid with flower icons for logged days, rest days as moon icons.
-// Tap any day to see the win text + flower type.
+// Shows a month grid with flower icons for logged days, rest days as coffee icon ☕.
+// Tap any day to see ALL wins (not just first) + flower type.
 // Navigate between months with prev/next arrows.
+// ENHANCEMENT: Detail panel shows all 3 wins from multi-win days
 // Responsive on mobile + desktop.
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   getEntriesForMonth,
   formatDate,
-  getAllEntriesSorted,
 } from '../utils/storage'
-import WatercolorPlant, { getFlowerType, getGrowthStage } from './WatercolorPlant'
 
 const FLOWER_NAMES = {
   'pink-dahlia':     '🌸 pink dahlia',
@@ -193,8 +192,6 @@ export default function CalendarView() {
           gridTemplateColumns: 'repeat(7, 1fr)',
           gap: '6px',
           padding: '0 18px 12px',
-          maxHeight: '280px',
-          overflowY: 'auto',
         }}
       >
         {calendarDays.map((day, index) => {
@@ -249,7 +246,7 @@ export default function CalendarView() {
               {/* Flower or rest icon */}
               {entry && (
                 <div style={{ fontSize: '18px', marginBottom: '2px' }}>
-                  {entry.mode === 'rest' ? '🌙' : '🌸'}
+                  {entry.mode === 'rest' ? '☕' : '🌸'}
                 </div>
               )}
 
@@ -268,7 +265,7 @@ export default function CalendarView() {
         })}
       </div>
 
-      {/* ── Detail panel ──────────────────────────────── */}
+      {/* ── Detail panel (ENHANCEMENT 2: Shows ALL wins) ─ */}
       {selectedDay && (
         <div
           style={{
@@ -306,37 +303,59 @@ export default function CalendarView() {
                     lineHeight: '1.6',
                   }}
                 >
-                  You chose rest today. And that was enough. 🌙
+                  You chose rest today. And that was enough. ☕
                 </p>
               ) : (
                 <>
-                  <p
-                    style={{
-                      fontFamily: '"Lora", Georgia, serif',
-                      fontSize: '13px',
-                      color: '#5C3D1E',
-                      margin: '0 0 10px',
-                      fontStyle: 'italic',
-                      lineHeight: '1.6',
-                    }}
-                  >
-                    "{selectedEntry.text}"
-                  </p>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      fontSize: '12px',
-                      color: '#7A5C44',
-                      background: 'rgba(200,240,220,0.3)',
-                      padding: '4px 10px',
-                      borderRadius: '20px',
-                      border: '1px solid #81B89A',
-                    }}
-                  >
-                    🌸 {FLOWER_NAMES[selectedEntry.flower] || 'flower'}
-                  </span>
+                  {/* Show ALL wins from this day (ENHANCEMENT 2) */}
+                  {selectedEntry.wins && selectedEntry.wins.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {selectedEntry.wins.map((win, idx) => (
+                        <div key={idx}>
+                          <p
+                            style={{
+                              fontFamily: '"Lora", Georgia, serif',
+                              fontSize: '13px',
+                              color: '#5C3D1E',
+                              margin: '0 0 6px',
+                              fontStyle: 'italic',
+                              lineHeight: '1.6',
+                            }}
+                          >
+                            "{win.text}"
+                          </p>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '12px',
+                              color: '#7A5C44',
+                              background: 'rgba(200,240,220,0.3)',
+                              padding: '4px 10px',
+                              borderRadius: '20px',
+                              border: '1px solid #81B89A',
+                            }}
+                          >
+                            🌸 {FLOWER_NAMES[win.flower] || 'flower'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p
+                      style={{
+                        fontFamily: '"Lora", Georgia, serif',
+                        fontSize: '13px',
+                        color: '#5C3D1E',
+                        margin: 0,
+                        fontStyle: 'italic',
+                        lineHeight: '1.6',
+                      }}
+                    >
+                      "{selectedEntry.text}"
+                    </p>
+                  )}
                 </>
               )}
             </>
