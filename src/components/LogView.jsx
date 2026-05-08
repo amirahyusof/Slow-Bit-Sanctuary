@@ -1,7 +1,8 @@
 // LogView.jsx — Phase 3 & 4: Builder's Log Archive
 // Shows chronological diary of every logged win.
-// Rest days shown with moon icon 🌙.
+// Rest days shown with coffee icon ☕.
 // Flower badges show which type was planted.
+// ENHANCEMENT: All 3 wins from multi-win days are visible as separate entries
 // No editing/deleting — keeps it honest and guilt-free.
 // Fully animated and responsive.
 
@@ -25,7 +26,7 @@ export default function LogView() {
     setEntries(all)
   }, [])
 
-  const winEntries = entries.filter(e => e.mode === 'win' && e.text)
+  const winEntries = entries.filter(e => e.mode === 'win')
   const restEntries = entries.filter(e => e.mode === 'rest')
 
   return (
@@ -132,7 +133,7 @@ export default function LogView() {
         }}
       >
         {entries.map((entry, index) => (
-          <LogEntry key={entry.key} entry={entry} index={index} />
+          <LogEntry key={`${entry.key}-${entry.winIndex || 0}`} entry={entry} index={index} />
         ))}
       </div>
 
@@ -160,8 +161,7 @@ export default function LogView() {
 // ── Single log entry ───────────────────────────────────────
 function LogEntry({ entry, index }) {
   const isRest = entry.mode === 'rest'
-  const flowerName = FLOWER_NAMES[entry.flower] || '🌸 flower'
-  const stage = getGrowthStage(entry.timestamp)
+  const hasMultipleWins = entry.mode === 'win' && entry.wins && entry.wins.length > 1
 
   return (
     <div
@@ -194,12 +194,12 @@ function LogEntry({ entry, index }) {
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Tiny plant icon (only for wins) */}
-      {!isRest && entry.flower && (
+      {/* Tiny plant icon (only for single win entries) */}
+      {!isRest && !hasMultipleWins && entry.flower && (
         <div style={{ flexShrink: 0, marginTop: '2px', opacity: 0.8 }}>
           <WatercolorPlant
             flowerType={entry.flower}
-            growthStage={stage}
+            growthStage={getGrowthStage(entry.timestamp)}
             size={0.6}
             animate={false}
           />
@@ -219,7 +219,7 @@ function LogEntry({ entry, index }) {
             fontSize: '16px',
           }}
         >
-          🌙
+          ☕
         </div>
       )}
 
@@ -245,22 +245,6 @@ function LogEntry({ entry, index }) {
           {formatDate(entry.key)}
         </span>
 
-        {/* Win text */}
-        {entry.text && (
-          <p
-            style={{
-              fontFamily: '"Lora", Georgia, serif',
-              fontSize: '14px',
-              color: '#5C3D1E',
-              margin: 0,
-              lineHeight: '1.5',
-              fontStyle: 'italic',
-            }}
-          >
-            "{entry.text}"
-          </p>
-        )}
-
         {/* Rest message */}
         {isRest && (
           <p
@@ -277,30 +261,87 @@ function LogEntry({ entry, index }) {
           </p>
         )}
 
-        {/* Flower badge (wins only) */}
-        {!isRest && entry.flower && (
-          <div
-            style={{
-              display: 'inline-block',
-              background: 'rgba(141, 170, 145, 0.2)',
-              border: '1px solid rgba(141, 170, 145, 0.4)',
-              padding: '4px 10px',
-              fontFamily: '"Indie Flower", cursive',
-              fontSize: '11px',
-              color: '#5C8C64',
-              borderRadius: '18px',
-              marginTop: '4px',
-              alignSelf: 'flex-start',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
-            }}
-          >
-            {flowerName}
+        {/* Single win (one entry per day) */}
+        {entry.mode === 'win' && entry.wins && entry.wins.length === 1 && (
+          <>
+            <p
+              style={{
+                fontFamily: '"Lora", Georgia, serif',
+                fontSize: '14px',
+                color: '#5C3D1E',
+                margin: 0,
+                lineHeight: '1.5',
+                fontStyle: 'italic',
+              }}
+            >
+              "{entry.wins[0].text}"
+            </p>
+            <div
+              style={{
+                display: 'inline-block',
+                background: 'rgba(141, 170, 145, 0.2)',
+                border: '1px solid rgba(141, 170, 145, 0.4)',
+                padding: '4px 10px',
+                fontFamily: '"Indie Flower", cursive',
+                fontSize: '11px',
+                color: '#5C8C64',
+                borderRadius: '18px',
+                marginTop: '4px',
+                alignSelf: 'flex-start',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
+              }}
+            >
+              {FLOWER_NAMES[entry.wins[0].flower] || '🌸 flower'}
+            </div>
+          </>
+        )}
+
+        {/* Multiple wins (all 3 on same date as one entry) */}
+        {entry.mode === 'win' && entry.wins && entry.wins.length > 1 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {entry.wins.map((win, idx) => (
+              <div key={idx}>
+                <p
+                  style={{
+                    fontFamily: '"Lora", Georgia, serif',
+                    fontSize: '14px',
+                    color: '#5C3D1E',
+                    margin: '0 0 6px',
+                    lineHeight: '1.5',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  "{win.text}"
+                </p>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    background: 'rgba(141, 170, 145, 0.2)',
+                    border: '1px solid rgba(141, 170, 145, 0.4)',
+                    padding: '4px 10px',
+                    fontFamily: '"Indie Flower", cursive',
+                    fontSize: '11px',
+                    color: '#5C8C64',
+                    borderRadius: '18px',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
+                  }}
+                >
+                  {FLOWER_NAMES[win.flower] || '🌸 flower'}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
