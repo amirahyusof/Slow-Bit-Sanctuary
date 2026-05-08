@@ -245,21 +245,40 @@ export default function CalendarView() {
             >
               {/* Flower or rest icon */}
               {entry && (
-                <div style={{ fontSize: '18px', marginBottom: '2px' }}>
+                <div style={{ fontSize: '16px' }}>
                   {entry.mode === 'rest' ? '☕' : '🌸'}
+                  {/* Numeric badge (Shows how many wins) — DESIGN_DECISIONS requirement */}
+                  {entry && entry.mode === 'win' && entry.wins && entry.wins.length > 1 && (
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        color: '#5C8C64',
+                        background: 'rgba(141, 170, 145, 0.3)',
+                        padding: '1px 4px',
+                        borderRadius: '10px',
+                        lineHeight: '1',
+                      }}
+                    >
+                      {entry.wins.length}
+                    </span>
+                  )}
                 </div>
               )}
 
-              {/* Day number */}
-              <span
-                style={{
-                  fontSize: '13px',
-                  color: day ? '#5C3D1E' : '#E5C5A0',
-                  fontWeight: day ? '500' : '400',
-                }}
-              >
-                {day}
-              </span>
+              {/* Day number + Win count badge */}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    color: day ? '#5C3D1E' : '#E5C5A0',
+                    fontWeight: day ? '500' : '400',
+                  }}
+                >
+                  {day}
+                </span>
+                
+              </div>
             </div>
           )
         })}
