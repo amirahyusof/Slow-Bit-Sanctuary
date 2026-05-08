@@ -2,6 +2,7 @@
 // Uses absolute positioning to create depth and overlapping plants.
 // Adds floral contribution grid (like GitHub contributions).
 // Includes organic SVG soil texture and floating elements.
+// ENHANCEMENT: Day labels added below each plant
 // Fully responsive with stat chips and streak counter.
 
 import { useState, useEffect } from 'react'
@@ -312,65 +313,102 @@ function FloralGrid({ entries }) {
   const todayDate = now.getDate()
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '4px',
-        background: 'rgba(253, 251, 247, 0.5)',
-        padding: '10px',
-        borderRadius: '12px',
-        border: '1px solid rgba(194, 163, 138, 0.15)',
-      }}
-    >
-      {/* Empty cells for days before month */}
-      {Array.from({ length: firstDay }).map((_, i) => (
-        <div key={`empty-${i}`} style={{ aspectRatio: '1' }} />
-      ))}
-
-      {/* Days with entries */}
-      {Array.from({ length: daysInMonth }).map((_, i) => {
-        const day = i + 1
-        const entry = entryMap[day]
-        const isToday = day === todayDate
-
-        return (
+    <div>
+      {/* Day headers */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '4px',
+          marginBottom: '4px',
+          paddingLeft: '10px',
+          paddingRight: '10px',
+        }}
+      >
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
           <div
             key={day}
             style={{
-              aspectRatio: '1',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              fontWeight: '500',
-              background: entry
-                ? entry.mode === 'rest'
-                  ? 'rgba(201, 184, 216, 0.3)'
-                  : 'rgba(244, 184, 200, 0.4)'
-                : 'rgba(194, 163, 138, 0.08)',
-              border: isToday ? '2px solid #FF9A5C' : '1px solid rgba(194, 163, 138, 0.1)',
-              color: '#7A5C44',
-              transition: 'all 0.2s',
-              cursor: 'default',
+              textAlign: 'center',
+              fontSize: '10px',
+              fontWeight: '600',
+              color: '#A88C74',
+              padding: '2px 0',
             }}
-            onMouseEnter={e => {
-              if (entry) {
-                e.currentTarget.style.transform = 'scale(1.1)'
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(194,163,138,0.2)'
-              }
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'scale(1)'
-              e.currentTarget.style.boxShadow = 'none'
-            }}
-            title={entry ? formatDate(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`) : ''}
           >
-            {entry && (entry.mode === 'rest' ? '🌙' : '🌸')}
+            {day}
           </div>
-        )
-      })}
+        ))}
+      </div>
+
+      {/* Grid with flowers and day numbers */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '4px',
+          background: 'rgba(253, 251, 247, 0.5)',
+          padding: '10px',
+          borderRadius: '12px',
+          border: '1px solid rgba(194, 163, 138, 0.15)',
+        }}
+      >
+        {/* Empty cells for days before month */}
+        {Array.from({ length: firstDay }).map((_, i) => (
+          <div key={`empty-${i}`} style={{ aspectRatio: '1' }} />
+        ))}
+
+        {/* Days with entries */}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1
+          const entry = entryMap[day]
+          const isToday = day === todayDate
+
+          return (
+            <div
+              key={day}
+              style={{
+                aspectRatio: '1',
+                borderRadius: '6px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2px',
+                fontSize: '12px',
+                fontWeight: '500',
+                background: entry
+                  ? entry.mode === 'rest'
+                    ? 'rgba(201, 184, 216, 0.3)'
+                    : 'rgba(244, 184, 200, 0.4)'
+                  : 'rgba(194, 163, 138, 0.08)',
+                border: isToday ? '2px solid #FF9A5C' : '1px solid rgba(194, 163, 138, 0.1)',
+                color: '#7A5C44',
+                transition: 'all 0.2s',
+                cursor: 'default',
+              }}
+              onMouseEnter={e => {
+                if (entry) {
+                  e.currentTarget.style.transform = 'scale(1.1)'
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(194,163,138,0.2)'
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'scale(1)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+              title={entry ? formatDate(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`) : ''}
+            >
+              {/* Flower or rest icon */}
+              {entry && (
+                <span style={{ fontSize: '20px' }}>
+                  {entry.mode === 'rest' ? '🌙' : '🌸'}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
