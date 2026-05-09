@@ -1,20 +1,33 @@
-// GardenView.jsx — Phase 3: Lush Layered Garden
-// Uses absolute positioning to create depth and overlapping plants.
-// Adds floral contribution grid (like GitHub contributions).
-// Includes organic SVG soil texture and floating elements.
-// ENHANCEMENT: Day labels added below each plant
-// Fully responsive with stat chips and streak counter.
-
 import { useState, useEffect } from 'react'
-import WatercolorPlant, { getGrowthStage, getFlowerType } from './WatercolorPlant'
 import {
   getAllEntriesSorted,
   getEntriesForMonth,
   getMonthWinCount,
   getCurrentStreak,
-  todayKey,
   formatDate,
 } from '../utils/storage'
+
+// ── IMPORT ASSETS ──
+import staticBg from '../assets/static-background.png'
+import dahliaImg from '../assets/pink_dahlia.png'
+import tulipImg from '../assets/Purple & Pink Tulips.png'
+import marigoldImg from '../assets/sunset_marigold.png'
+import saplingImg from '../assets/Small Sapling_Tree.png'
+import succulentImg from '../assets/Small Succulent.png'
+
+const FLOWER_ASSETS = [dahliaImg, tulipImg, marigoldImg, saplingImg, succulentImg];
+
+const MEADOW_COORDINATES = [
+  { top: '72%', left: '15%', scale: 0.8 }, { top: '74%', left: '35%', scale: 0.85 },
+  { top: '71%', left: '55%', scale: 0.8 }, { top: '75%', left: '75%', scale: 0.9 },
+  { top: '73%', left: '90%', scale: 0.85 },
+  { top: '80%', left: '10%', scale: 1.0 }, { top: '83%', left: '25%', scale: 1.05 },
+  { top: '81%', left: '45%', scale: 1.1 }, { top: '84%', left: '65%', scale: 1.0 },
+  { top: '81%', left: '85%', scale: 1.05 },
+  { top: '89%', left: '18%', scale: 1.2 }, { top: '92%', left: '38%', scale: 1.3 },
+  { top: '91%', left: '58%', scale: 1.2 }, { top: '93%', left: '78%', scale: 1.35 },
+  { top: '88%', left: '5%', scale: 1.2 }, { top: '89%', left: '50%', scale: 1.25 }
+];
 
 export default function GardenView({ momMode }) {
   const [entries, setEntries] = useState([])
@@ -25,7 +38,6 @@ export default function GardenView({ momMode }) {
   useEffect(() => {
     const all = getAllEntriesSorted()
     setEntries(all)
-
     const now = new Date()
     const month = getEntriesForMonth(now.getFullYear(), now.getMonth() + 1)
     setMonthEntries(month)
@@ -33,277 +45,123 @@ export default function GardenView({ momMode }) {
     setStreak(getCurrentStreak())
   }, [])
 
+  const plantEntries = entries.filter(e => e.mode === 'win')
   const now = new Date()
   const monthName = now.toLocaleString('en-GB', { month: 'long', year: 'numeric' })
 
-  // Only wins create visible plants
-  const plantEntries = entries.filter(e => e.mode === 'win')
-  const flowerTypes = new Set(plantEntries.map((e, i) => e.flower || getFlowerType(i)))
-
-  const skyBg = momMode === 'sunset'
-    ? 'linear-gradient(180deg, #F4A87C 0%, #FFB347 60%, #FFD580 100%)'
-    : 'linear-gradient(180deg, #FDE8D0 0%, #FFF0E0 60%, #F5DEB3 100%)'
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* ── Sky scene with layered plants ─────────────────── */}
-      <div
-        style={{
-          background: skyBg,
-          transition: 'background 2000ms ease',
-          minHeight: '240px',
-          position: 'relative',
-          overflow: 'hidden',
-          borderRadius: '0 0 24px 24px',
-        }}
-      >
-        {/* Floating decorative elements */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '20px',
-            left: '15%',
-            fontSize: '18px',
-            animation: 'flutter 4s ease-in-out infinite',
-          }}
-        >
-          🦋
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: '50px',
-            right: '20%',
-            fontSize: '18px',
-            animation: 'flutter 5s ease-in-out infinite 1.5s',
-          }}
-        >
-          🦋
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: '60px',
-            left: '40%',
-            fontSize: '16px',
-            animation: 'flutter 3.5s ease-in-out infinite 0.8s',
-          }}
-        >
-          🐝
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', padding:'12px', height: '100vh', backgroundColor: '#FDFBF7', boxSizing: 'border-box' }}>
+      
+      {/* ── 1. GAYA WILD MEADOW (50vh) ────────────────────── */}
+      <div style={{
+        height: '50vh',
+        position: 'relative',
+        backgroundImage: `url(${staticBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        overflow: 'hidden',
+        borderRadius: '30px',
+        border: '1px solid rgba(139, 94, 46, 0.1)'
+      }}>
+        {momMode === 'sunset' && (
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(255,140,0,0.2) 0%, rgba(255,69,0,0.1) 100%)', pointerEvents: 'none', zIndex: 1 }} />
+        )}
 
-        {/* Sparkles */}
-        {[
-          { top: '30px', left: '60%' },
-          { top: '80px', left: '25%' },
-          { top: '40px', right: '30%' },
-        ].map((pos, i) => (
-          <div
-            key={i}
-            style={{
+        {plantEntries.slice(0, MEADOW_COORDINATES.length).map((entry, i) => {
+          const coord = MEADOW_COORDINATES[i];
+          const flowerImg = FLOWER_ASSETS[i % FLOWER_ASSETS.length];
+          
+          return (
+            <div key={i} style={{
               position: 'absolute',
-              ...pos,
-              width: '4px',
-              height: '4px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.8)',
-              animation: `sparkle 2s ease-in-out infinite ${i * 0.6}s`,
-            }}
-          />
-        ))}
-
-        {/* ── Layered plants (absolute positioning) ───────── */}
-        <div
-          style={{
-            position: 'relative',
-            height: '180px',
-            width: '100%',
-          }}
-        >
-          {plantEntries.length === 0 ? (
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                textAlign: 'center',
-                fontFamily: '"Indie Flower", cursive',
-                fontSize: '14px',
-                color: '#B89C88',
-                lineHeight: '1.8',
-              }}
-            >
-              <div>Your first win will plant</div>
-              <div>the first flower 🌱</div>
+              top: coord.top,
+              left: coord.left,
+              zIndex: parseInt(coord.top), 
+              transform: `scale(${coord.scale}) translate(-50%, -100%)`, 
+              width: '100px',
+              mixBlendMode: 'normal',
+              opacity: 0.95,
+              animation: `sway ${4 + (i % 2)}s ease-in-out infinite`,
+              imageRendering: 'auto', 
+              cursor: 'default'
+            }}>
+              <img 
+                src={flowerImg} 
+                alt="flower" 
+                style={{ width: '100%', height:'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.08))' }} 
+              />
             </div>
-          ) : (
-            plantEntries.map((entry, i) => {
-              const stage = getGrowthStage(entry.timestamp)
-              const flowerKey = entry.flower || getFlowerType(i)
-
-              // Spread plants across the width organically
-              const leftPercent = ((i * 13) % 88) + 5
-              const bottomOffset = ((i % 4) * 8) // Stagger vertically for depth
-
-              // Vary sizes slightly
-              const sizeVariants = [0.85, 0.95, 1.0, 0.9, 1.05]
-              const size = sizeVariants[i % sizeVariants.length]
-
-              const zIndex = bottomOffset // Higher bottom = higher z-index (less behind)
-
-              return (
-                <div
-                  key={entry.key || i}
-                  title={entry.text}
-                  style={{
-                    position: 'absolute',
-                    left: `${leftPercent}%`,
-                    bottom: `${bottomOffset}px`,
-                    zIndex: zIndex,
-                    animation: `plantGrow 0.6s cubic-bezier(0.36, 1.56, 0.64, 1) ${i * 0.05}s both`,
-                    filter: 'drop-shadow(0 2px 6px rgba(139,94,46,0.08))',
-                    cursor: 'default',
-                  }}
-                >
-                  <WatercolorPlant
-                    flowerType={flowerKey}
-                    growthStage={stage}
-                    size={size}
-                    animate={true}
-                  />
-                </div>
-              )
-            })
-          )}
-        </div>
-
-        {/* ── Soil strip ────────────────────────────────── */}
-        <SoilStrip winsCount={winCount} />
+          )
+        })}
       </div>
 
-      {/* ── Garden info ───────────────────────────────────── */}
-      <div style={{ padding: '16px 18px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* Month label */}
-        <p
-          style={{
-            fontFamily: '"Indie Flower", cursive',
-            fontSize: '13px',
-            color: '#A88C74',
-            margin: 0,
-          }}
-        >
-          {monthName} · {plantEntries.length} plant{plantEntries.length !== 1 ? 's' : ''} grown
-        </p>
-
-        {/* Stat chips */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <StatChip value={winCount} label="days\nlogged" />
-          <StatChip value={streak} label="day\nstreak" />
-          <StatChip value={flowerTypes.size} label="plants\ngrowing" />
+      {/* ── 2. GARDEN INFO & CONTRIBUTION (30-40%) ────────────────── */}
+      <div style={{ flex: 1, padding: '16px 8px', display: 'flex', flexDirection: 'column', gap: '12px', color: '#4A3728' }}>
+        
+        {/* Row 1: Month & StatChips */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ fontFamily: '"Indie Flower", cursive', fontSize: '22px', color: '#A88C74', margin: 0 }}>
+              {monthName}
+            </h2>
+            <p style={{ fontFamily: '"Indie Flower", cursive', fontSize: '13px', color: '#A88C74', margin: 0 }}>
+              {winCount} plant{winCount !== 1 ? 's' : ''} grown this month
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <StatChip value={winCount} label="Logged" />
+            <StatChip value={streak} label="Day Streak" />
+          </div>
         </div>
 
-        {/* Floral contribution grid */}
-        <div>
-          <p
-            style={{
-              fontFamily: '"Indie Flower", cursive',
-              fontSize: '12px',
-              color: '#A88C74',
-              margin: '0 0 8px',
-            }}
-          >
+        {/* Row 2: Floral Contribution Grid (Gaya Linear) */}
+        <div style={{ 
+            flex: 1, 
+            backgroundColor: 'rgba(241, 228, 216, 0.25)', // Soft background (as per visual-image-02)
+            borderRadius: '20px', 
+            padding: '12px 16px', 
+            border: '1px solid rgba(194, 163, 138, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}>
+          <p style={{ fontFamily: '"Indie Flower", cursive', fontSize: '13px', color: '#A88C74', margin: '0 0 10px 4px' }}>
             this month at a glance
           </p>
-          <FloralGrid entries={monthEntries} />
+          <FloralGrid entries={monthEntries} flowerAssets={FLOWER_ASSETS} />
         </div>
       </div>
 
-      {/* ── Keyframes ─────────────────────────────────────── */}
       <style>{`
-        @keyframes plantGrow {
-          from {
-            opacity: 0;
-            transform: translateY(12px) scaleY(0.7);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scaleY(1);
-          }
-        }
-        @keyframes flutter {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          33% { transform: translateY(-8px) translateX(4px); }
-          66% { transform: translateY(-4px) translateX(-3px); }
-        }
-        @keyframes sparkle {
-          0%, 100% { opacity: 0; transform: scale(0); }
-          50% { opacity: 1; transform: scale(1); }
-        }
+        @keyframes sway { 0%, 100% { transform: scale(var(--tw-scale-x, 1)) rotate(-1.5deg) translate(-50%, -100%); } 50% { transform: scale(var(--tw-scale-x, 1)) rotate(1.5deg) translate(-50%, -100%); } }
       `}</style>
     </div>
   )
 }
 
-// ── Stat chip component ────────────────────────────────────
 function StatChip({ value, label }) {
   return (
-    <div
-      style={{
+    <div style={{
         background: 'rgba(255, 240, 210, 0.6)',
-        border: '1.5px solid rgba(194, 163, 138, 0.4)',
-        borderRadius: '12px',
-        padding: '10px 14px',
+        border: '1.5px solid rgba(194, 163, 138, 0.3)',
+        borderRadius: '14px',
+        padding: '8px 12px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '2px',
-        flex: 1,
-        minWidth: '70px',
-        transition: 'all 0.2s',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = 'rgba(255, 220, 179, 0.8)'
-        e.currentTarget.style.transform = 'translateY(-2px)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'rgba(255, 240, 210, 0.6)'
-        e.currentTarget.style.transform = 'translateY(0)'
-      }}
-    >
-      <span
-        style={{
-          fontFamily: '"Lora", Georgia, serif',
-          fontSize: '18px',
-          fontWeight: '700',
-          color: '#5C3D1E',
-          lineHeight: '1',
-        }}
-      >
-        {value}
-      </span>
-      <span
-        style={{
-          fontFamily: '"Indie Flower", cursive',
-          fontSize: '10px',
-          color: '#A88C74',
-          textAlign: 'center',
-          lineHeight: '1.3',
-          whiteSpace: 'pre-wrap',
-        }}
-      >
-        {label}
-      </span>
+        minWidth: '65px',
+        transition: 'all 0.2s'
+      }}>
+      <span style={{ fontFamily: '"Lora", serif', fontSize: '18px', fontWeight: '700', color: '#5C3D1E' }}>{value}</span>
+      <span style={{ fontFamily: '"Indie Flower", cursive', fontSize: '9px', color: '#A88C74', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
     </div>
   )
 }
 
-// ── Floral contribution grid (GitHub-style) ────────────────
-function FloralGrid({ entries }) {
+function FloralGrid({ entries, flowerAssets }) {
   const now = new Date()
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay()
-
+  
   const entryMap = {}
   entries.forEach(e => {
     const day = parseInt(e.key.split('-')[2])
@@ -313,153 +171,65 @@ function FloralGrid({ entries }) {
   const todayDate = now.getDate()
 
   return (
-    <div>
-      {/* Day headers */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '4px',
-          marginBottom: '4px',
-          paddingLeft: '10px',
-          paddingRight: '10px',
-        }}
-      >
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-          <div
-            key={day}
-            style={{
-              textAlign: 'center',
-              fontSize: '10px',
-              fontWeight: '600',
-              color: '#A88C74',
-              padding: '2px 0',
-            }}
-          >
-            {day}
-          </div>
-        ))}
-      </div>
+    <div style={{ 
+      display: 'grid', 
+      // 11 lajur x 3 baris = 33 kotak (Cukup untuk 31 hari)
+      gridTemplateColumns: 'repeat(11, 1fr)', 
+      background: 'rgba(253, 251, 247, 0.5)',
+      gap: '6px', 
+      
+    }}>
+      {Array.from({ length: daysInMonth }).map((_, i) => {
+        const day = i + 1
+        const entry = entryMap[day]
+        const isToday = day === todayDate
+        const flowerImg = flowerAssets[i % flowerAssets.length]
 
-      {/* Grid with flowers and day numbers */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '4px',
-          background: 'rgba(253, 251, 247, 0.5)',
-          padding: '10px',
-          borderRadius: '12px',
-          border: '1px solid rgba(194, 163, 138, 0.15)',
-        }}
-      >
-        {/* Empty cells for days before month */}
-        {Array.from({ length: firstDay }).map((_, i) => (
-          <div key={`empty-${i}`} style={{ aspectRatio: '1' }} />
-        ))}
-
-        {/* Days with entries */}
-        {Array.from({ length: daysInMonth }).map((_, i) => {
-          const day = i + 1
-          const entry = entryMap[day]
-          const isToday = day === todayDate
-
-          return (
-            <div
-              key={day}
-              style={{
-                aspectRatio: '1',
-                borderRadius: '6px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '2px',
-                fontSize: '12px',
-                fontWeight: '500',
-                background: entry
+        return (
+          <div key={day} 
+          style={{
+            aspectRatio: '1', 
+            borderRadius: '6px', 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: entry
                   ? entry.mode === 'rest'
                     ? 'rgba(201, 184, 216, 0.3)'
                     : 'rgba(244, 184, 200, 0.4)'
                   : 'rgba(194, 163, 138, 0.08)',
                 border: isToday ? '2px solid #FF9A5C' : '1px solid rgba(194, 163, 138, 0.1)',
-                color: '#7A5C44',
-                transition: 'all 0.2s',
-                cursor: 'default',
-              }}
-              onMouseEnter={e => {
-                if (entry) {
-                  e.currentTarget.style.transform = 'scale(1.1)'
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(194,163,138,0.2)'
-                }
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'scale(1)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-              title={entry ? formatDate(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`) : ''}
-            >
-              {/* Flower or rest icon */}
-              {entry && (
-                <span style={{ fontSize: '20px' }}>
-                  {entry.mode === 'rest' ? '🌙' : '🌸'}
-                </span>
-              )}
-            </div>
-          )
-        })}
-      </div>
+            position: 'relative',
+            color: '#7A5C44',
+            transition: 'all 0.2s',
+            cursor: 'default',
+            }}
+            onMouseEnter={e => {
+              if (entry) {
+                e.currentTarget.style.transform = 'scale(1.1)'
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(194,163,138,0.2)'
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+          >
+            {entry?.mode === 'win' && (
+              <img src={flowerImg} style={{ width: '75%', height: '75%', objectFit: 'contain' }} />
+            )}
+            {entry?.mode === 'rest' && (
+              <span style={{ fontSize: '20px' }}>🌙</span>
+            )}
+            
+            {/* Dot indikator hari ini (Optional, untuk UX yang lebih baik) */}
+            {isToday && (
+              <div style={{ position: 'absolute', bottom: '-4px', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#FF9A5C' }} />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-// ── Organic soil strip ─────────────────────────────────────
-function SoilStrip({ winsCount }) {
-  const SOIL_COLORS = [
-    '#F5DEB3', '#EDD09A', '#E5C882', '#D4A96A',
-    '#C8985A', '#BC8A4C', '#B8884A', '#A87840',
-    '#9C6C36', '#8B5E2E',
-  ]
-  const TOTAL_CELLS = 32
-  const filledCells = Math.min(winsCount * 2, TOTAL_CELLS)
-  const richColorIdx = Math.floor((filledCells / TOTAL_CELLS) * (SOIL_COLORS.length - 1))
-  const richColor = SOIL_COLORS[Math.min(richColorIdx + 1, SOIL_COLORS.length - 1)]
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        height: '24px',
-        width: '100%',
-        overflow: 'hidden',
-        background: `linear-gradient(to bottom, ${SOIL_COLORS[0]}, ${SOIL_COLORS[3]})`,
-        position: 'relative',
-      }}
-    >
-      {/* SVG texture overlay */}
-      <svg width="100%" height="100%" style={{ position: 'absolute', opacity: 0.15, mixBlendMode: 'multiply' }}>
-        <defs>
-          <filter id="soilNoise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" />
-            <feColorMatrix type="saturate" values="0.1" />
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" filter="url(#soilNoise)" />
-      </svg>
-
-      {/* Color gradient cells */}
-      {Array.from({ length: TOTAL_CELLS }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: `${100 / TOTAL_CELLS}%`,
-            height: '100%',
-            backgroundColor: i < filledCells ? richColor : SOIL_COLORS[0],
-            transition: 'background-color 1.5s ease',
-            borderRight: '0.5px solid rgba(139,94,46,0.1)',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
