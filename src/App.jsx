@@ -1,8 +1,11 @@
-// App.jsx — Responsive Layout (Priority 3)
-// Desktop-first: 2-column on 1200px+, single column on mobile
+// App.jsx — Phase 3C: Adaptive Navigation + Responsive Layout
+// Desktop: FloatingRail on RIGHT side
+// Mobile/Tablet: BottomNav at BOTTOM
+// Switch at 1024px breakpoint
 
 import { useState, useEffect } from 'react'
 import BottomNav from './components/BottomNav'
+import FloatingRail from './components/FloatingRail'
 import GardenView from './components/GardenView'
 import TodayView from './components/TodayView'
 import CalendarView from './components/CalendarView'
@@ -11,16 +14,16 @@ import { saveMomMode, loadMomMode } from './utils/storage'
 
 const THEMES = {
   day: {
-    bg:       '#FDE8D0',
-    shell:    '#FFF8F0',
-    border:   '#D4BCA8',
-    label:    '☀️ bright day',
+    bg: '#FDE8D0',
+    shell: '#FFF8F0',
+    border: '#D4BCA8',
+    label: '☀️ bright day',
   },
   sunset: {
-    bg:       '#F4A87C',
-    shell:    '#FFF0DC',
-    border:   '#C8784A',
-    label:    '✦ warm sunset',
+    bg: '#F4A87C',
+    shell: '#FFF0DC',
+    border: '#C8784A',
+    label: '✦ warm sunset',
   },
 }
 
@@ -28,7 +31,9 @@ export default function App() {
   const [activePage, setActivePage] = useState('garden')
   const [momMode, setMomMode] = useState('day')
   const [refreshKey, setRefreshKey] = useState(0)
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  )
 
   // Load Mom Mode from storage
   useEffect(() => {
@@ -44,7 +49,7 @@ export default function App() {
 
   function handleNavigate(page) {
     setActivePage(page)
-    setRefreshKey(k => k + 1)
+    setRefreshKey((k) => k + 1)
   }
 
   function handleMomModeToggle() {
@@ -55,11 +60,16 @@ export default function App() {
 
   function renderPage() {
     switch (activePage) {
-      case 'garden':   return <GardenView   key={refreshKey} momMode={momMode} />
-      case 'today':    return <TodayView    key={refreshKey} momMode={momMode} />
-      case 'calendar': return <CalendarView key={refreshKey} />
-      case 'log':      return <LogView      key={refreshKey} />
-      default:         return <GardenView   key={refreshKey} momMode={momMode} />
+      case 'garden':
+        return <GardenView key={refreshKey} momMode={momMode} />
+      case 'today':
+        return <TodayView key={refreshKey} momMode={momMode} />
+      case 'calendar':
+        return <CalendarView key={refreshKey} />
+      case 'log':
+        return <LogView key={refreshKey} />
+      default:
+        return <GardenView key={refreshKey} momMode={momMode} />
     }
   }
 
@@ -67,91 +77,112 @@ export default function App() {
 
   // Responsive breakpoints
   const isMobile = windowWidth < 768
-  const isTablet = windowWidth >= 768 && windowWidth < 1200
-  const isDesktop = windowWidth >= 1200
+  const isTablet = windowWidth >= 768 && windowWidth < 1024
+  const isDesktop = windowWidth >= 1024
 
   return (
-    <div style={{
-      minHeight:       '100vh',
-      display:         'flex',
-      justifyContent:  'center',
-      alignItems:      'flex-start',
-      backgroundColor: '#EDE4D8',
-      padding:         isMobile ? '8px' : isTablet ? '12px' : '24px',
-    }}>
-      <div style={{
-        width:           isMobile ? '100%' : isTablet ? '95%' : '100%',
-        maxWidth:        isDesktop ? '1400px' : 'none',
-        border:          `2px solid ${theme.border}`,
-        borderRadius:    isMobile ? '12px' : '24px',
-        overflow:        'hidden',
-        backgroundColor: theme.shell,
-        boxShadow:       isMobile ? '0 2px 12px rgba(139,94,46,0.08)' : '0 4px 24px rgba(139,94,46,0.12)',
-        transition:      'background-color 2000ms ease, border-color 2000ms ease',
-        display:         'flex',
-        flexDirection:   'column',
-        height:          '100vh',
-        maxHeight:       '100vh',
-      }}>
-
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        backgroundColor: '#EDE4D8',
+        padding: isMobile ? '8px' : isTablet ? '12px' : '24px',
+      }}
+    >
+      <div
+        style={{
+          width: isMobile ? '100%' : isTablet ? '95%' : '100%',
+          maxWidth: isDesktop ? '1400px' : 'none',
+          border: `2px solid ${theme.border}`,
+          borderRadius: isMobile ? '12px' : '24px',
+          overflow: 'hidden',
+          backgroundColor: theme.shell,
+          boxShadow: isMobile
+            ? '0 2px 12px rgba(139,94,46,0.08)'
+            : '0 4px 24px rgba(139,94,46,0.12)',
+          transition: 'background-color 2000ms ease, border-color 2000ms ease',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          maxHeight: '100vh',
+          // PHASE 3C: Add right padding on desktop to avoid content hidden behind FloatingRail
+          paddingRight: isDesktop ? '110px' : '0',
+        }}
+      >
         {/* ── Top bar ──────────────────────────────────── */}
-        <header style={{
-          display:         'flex',
-          justifyContent:  'space-between',
-          alignItems:      'center',
-          padding:         isMobile ? '12px 16px' : isTablet ? '14px 18px' : '16px 20px',
-          backgroundColor: theme.bg,
-          transition:      'background-color 2000ms ease',
-          flexShrink:      0,
-          borderBottom:    `1px solid ${theme.border}`,
-        }}>
+        <header
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: isMobile
+              ? '12px 16px'
+              : isTablet
+              ? '14px 18px'
+              : '16px 20px',
+            backgroundColor: theme.bg,
+            transition: 'background-color 2000ms ease',
+            flexShrink: 0,
+            borderBottom: `1px solid ${theme.border}`,
+          }}
+        >
           <div>
-            <p style={{
-              fontFamily: '"Lora", Georgia, serif',
-              fontSize:   isMobile ? '11px' : isTablet ? '12px' : '14px',
-              color:      '#4A3728',
-              margin:     '0 0 2px',
-              fontStyle:  'italic',
-            }}>
+            <p
+              style={{
+                fontFamily: '"Lora", Georgia, serif',
+                fontSize: isMobile ? '11px' : isTablet ? '12px' : '14px',
+                color: '#4A3728',
+                margin: '0 0 2px',
+                fontStyle: 'italic',
+              }}
+            >
               the
             </p>
-            <p style={{
-              fontFamily: '"Lora", Georgia, serif',
-              fontSize:   isMobile ? '15px' : isTablet ? '16px' : '17px',
-              fontWeight: '600',
-              color:      '#4A3728',
-              margin:     0,
-            }}>
+            <p
+              style={{
+                fontFamily: '"Lora", Georgia, serif',
+                fontSize: isMobile ? '15px' : isTablet ? '16px' : '17px',
+                fontWeight: '600',
+                color: '#4A3728',
+                margin: 0,
+              }}
+            >
               Slow-Bit Sanctuary
             </p>
           </div>
 
-          <div style={{
-            display:       'flex',
-            flexDirection: 'column',
-            alignItems:    'flex-end',
-            gap:           '4px',
-          }}>
-            <span style={{
-              fontFamily: '"Indie Flower", cursive',
-              fontSize:   isMobile ? '9px' : isTablet ? '10px' : '11px',
-              color:      '#A88C74',
-            }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: '4px',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: '"Indie Flower", cursive',
+                fontSize: isMobile ? '9px' : isTablet ? '10px' : '11px',
+                color: '#A88C74',
+              }}
+            >
               {theme.label}
             </span>
             <button
               onClick={handleMomModeToggle}
               style={{
-                fontFamily:      '"Indie Flower", cursive',
-                fontSize:        isMobile ? '13px' : isTablet ? '14px' : '16px',
-                color:           '#7A5C44',
+                fontFamily: '"Indie Flower", cursive',
+                fontSize: isMobile ? '13px' : isTablet ? '14px' : '16px',
+                color: '#7A5C44',
                 backgroundColor: 'rgba(253,251,247,0.8)',
-                border:          `1.5px solid ${theme.border}`,
-                borderRadius:    '20px',
-                padding:         isMobile ? '3px 10px' : '4px 12px',
-                cursor:          'pointer',
-                boxShadow:       '0 1px 4px rgba(139,94,46,0.1)',
-                transition:      'all 0.2s ease',
+                border: `1.5px solid ${theme.border}`,
+                borderRadius: '20px',
+                padding: isMobile ? '3px 10px' : '4px 12px',
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px rgba(139,94,46,0.1)',
+                transition: 'all 0.2s ease',
               }}
             >
               Mom Mode
@@ -160,19 +191,30 @@ export default function App() {
         </header>
 
         {/* ── Main content (scrollable) ──────────────────── */}
-        <main style={{
-          flex:       1,
-          overflowY:  'auto',
-          overflowX:  'hidden',
-          padding:    isMobile ? '0' : isTablet ? '0' : isDesktop ? '16px' : '0',
-        }}>
+        <main
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            padding: isMobile ? '0' : isTablet ? '0' : isDesktop ? '16px' : '0',
+          }}
+        >
           {renderPage()}
         </main>
 
-        {/* ── Bottom nav ────────────────────────────────── */}
-        <BottomNav activePage={activePage} onNavigate={handleNavigate} isMobile={isMobile} />
-
+        {/* ── PHASE 3C: Conditional Navigation ────────────── */}
+        {/* BottomNav for mobile/tablet */}
+        {!isDesktop && <BottomNav activePage={activePage} onNavigate={handleNavigate} />}
       </div>
+
+      {/* ── PHASE 3C: FloatingRail for desktop (fixed position) ── */}
+      {isDesktop && (
+        <FloatingRail
+          activePage={activePage}
+          onNavigate={handleNavigate}
+          momMode={momMode}
+        />
+      )}
     </div>
   )
 }
