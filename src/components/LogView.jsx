@@ -1,10 +1,5 @@
-// LogView.jsx — Phase 3 & 4: Builder's Log Archive
-// Shows chronological diary of every logged win.
-// Rest days shown with coffee icon ☕.
-// Flower badges show which type was planted.
-// ENHANCEMENT: All 3 wins from multi-win days are visible as separate entries
-// No editing/deleting — keeps it honest and guilt-free.
-// Fully animated and responsive.
+// LogView.jsx — Phase 3C: Rest Icon Consistency
+// Changed from no icon to ☕ (coffee) for rest entries to match theme
 
 import { useState, useEffect } from 'react'
 import { getAllEntriesSorted, formatDate } from '../utils/storage'
@@ -26,8 +21,8 @@ export default function LogView() {
     setEntries(all)
   }, [])
 
-  const winEntries = entries.filter(e => e.mode === 'win')
-  const restEntries = entries.filter(e => e.mode === 'rest')
+  const winEntries = entries.filter((e) => e.mode === 'win')
+  const restEntries = entries.filter((e) => e.mode === 'rest')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -179,14 +174,14 @@ function LogEntry({ entry, index }) {
         transition: 'all 0.2s',
         cursor: 'default',
       }}
-      onMouseEnter={e => {
+      onMouseEnter={(e) => {
         e.currentTarget.style.background = isRest
           ? 'rgba(201, 184, 216, 0.18)'
           : 'rgba(244, 184, 200, 0.18)'
         e.currentTarget.style.transform = 'translateY(-2px)'
         e.currentTarget.style.boxShadow = '0 4px 12px rgba(139,94,46,0.08)'
       }}
-      onMouseLeave={e => {
+      onMouseLeave={(e) => {
         e.currentTarget.style.background = isRest
           ? 'rgba(201, 184, 216, 0.12)'
           : 'rgba(244, 184, 200, 0.12)'
@@ -206,7 +201,7 @@ function LogEntry({ entry, index }) {
         </div>
       )}
 
-      {/* Rest icon */}
+      {/* PHASE 3C FIX: Rest icon now visible with ☕ */}
       {isRest && (
         <div
           style={{
@@ -290,10 +285,10 @@ function LogEntry({ entry, index }) {
                 alignSelf: 'flex-start',
                 transition: 'all 0.2s',
               }}
-              onMouseEnter={e => {
+              onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
               }}
-              onMouseLeave={e => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
               }}
             >
@@ -331,10 +326,10 @@ function LogEntry({ entry, index }) {
                     borderRadius: '18px',
                     transition: 'all 0.2s',
                   }}
-                  onMouseEnter={e => {
+                  onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
                   }}
-                  onMouseLeave={e => {
+                  onMouseLeave={(e) => {
                     e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
                   }}
                 >
