@@ -1,9 +1,5 @@
-// CalendarView.jsx — Phase 3: Complete Calendar Implementation
-// Shows a month grid with flower icons for logged days, rest days as coffee icon ☕.
-// Tap any day to see ALL wins (not just first) + flower type.
-// Navigate between months with prev/next arrows.
-// ENHANCEMENT: Detail panel shows all 3 wins from multi-win days
-// Responsive on mobile + desktop.
+// CalendarView.jsx — Phase 3C: Rest Icon Consistency
+// Changed from 🌙 (moon) to ☕ (coffee) for Bukan Hustle theme
 
 import { useState } from 'react'
 import {
@@ -12,10 +8,10 @@ import {
 } from '../utils/storage'
 
 const FLOWER_NAMES = {
-  'pink-dahlia':     '🌸 pink dahlia',
-  'lavender-tulip':  '🌷 lavender tulip',
-  'mint-daisy':      '🌼 mint daisy',
-  'peach-rose':      '🌹 peach rose',
+  'pink-dahlia': '🌸 pink dahlia',
+  'lavender-tulip': '🌷 lavender tulip',
+  'mint-daisy': '🌼 mint daisy',
+  'peach-rose': '🌹 peach rose',
   'sunset-marigold': '🌻 sunset marigold',
 }
 
@@ -38,7 +34,7 @@ export default function CalendarView() {
 
   const entries = getEntriesForMonth(displayYear, displayMonth + 1)
   const entryMap = {}
-  entries.forEach(e => {
+  entries.forEach((e) => {
     const dayNum = parseInt(e.key.split('-')[2])
     entryMap[dayNum] = e
   })
@@ -72,7 +68,7 @@ export default function CalendarView() {
   // Build calendar grid
   const calendarDays = []
   for (let i = 0; i < firstDay; i++) {
-    calendarDays.push(null) // Empty cell for days before month starts
+    calendarDays.push(null)
   }
   for (let d = 1; d <= daysInMonth; d++) {
     calendarDays.push(d)
@@ -107,11 +103,11 @@ export default function CalendarView() {
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          onMouseEnter={e => {
+          onMouseEnter={(e) => {
             e.target.style.background = '#F5DEB3'
             e.target.style.transform = 'scale(1.05)'
           }}
-          onMouseLeave={e => {
+          onMouseLeave={(e) => {
             e.target.style.background = 'rgba(255,255,255,0.7)'
             e.target.style.transform = 'scale(1)'
           }}
@@ -146,11 +142,11 @@ export default function CalendarView() {
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          onMouseEnter={e => {
+          onMouseEnter={(e) => {
             e.target.style.background = '#F5DEB3'
             e.target.style.transform = 'scale(1.05)'
           }}
-          onMouseLeave={e => {
+          onMouseLeave={(e) => {
             e.target.style.background = 'rgba(255,255,255,0.7)'
             e.target.style.transform = 'scale(1)'
           }}
@@ -169,7 +165,7 @@ export default function CalendarView() {
           margin: '4px 0',
         }}
       >
-        {dayLabels.map(day => (
+        {dayLabels.map((day) => (
           <div
             key={day}
             style={{
@@ -228,13 +224,13 @@ export default function CalendarView() {
                 transition: 'all 0.2s',
                 position: 'relative',
               }}
-              onMouseEnter={e => {
+              onMouseEnter={(e) => {
                 if (day) {
                   e.currentTarget.style.background = 'rgba(255,240,210,0.3)'
                   e.currentTarget.style.transform = 'scale(1.05)'
                 }
               }}
-              onMouseLeave={e => {
+              onMouseLeave={(e) => {
                 if (day) {
                   e.currentTarget.style.background = isSelected
                     ? 'rgba(244,184,200,0.2)'
@@ -246,8 +242,9 @@ export default function CalendarView() {
               {/* Flower or rest icon */}
               {entry && (
                 <div style={{ fontSize: '16px' }}>
+                  {/* PHASE 3C FIX: Changed from 🌙 to ☕ */}
                   {entry.mode === 'rest' ? '☕' : '🌸'}
-                  {/* Numeric badge (Shows how many wins) — DESIGN_DECISIONS requirement */}
+                  {/* Numeric badge (Shows how many wins) */}
                   {entry && entry.mode === 'win' && entry.wins && entry.wins.length > 1 && (
                     <span
                       style={{
@@ -266,7 +263,7 @@ export default function CalendarView() {
                 </div>
               )}
 
-              {/* Day number + Win count badge */}
+              {/* Day number */}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
                 <span
                   style={{
@@ -277,14 +274,13 @@ export default function CalendarView() {
                 >
                   {day}
                 </span>
-                
               </div>
             </div>
           )
         })}
       </div>
 
-      {/* ── Detail panel (ENHANCEMENT 2: Shows ALL wins) ─ */}
+      {/* ── Detail panel ────────────────────────────────── */}
       {selectedDay && (
         <div
           style={{
@@ -326,7 +322,7 @@ export default function CalendarView() {
                 </p>
               ) : (
                 <>
-                  {/* Show ALL wins from this day (ENHANCEMENT 2) */}
+                  {/* Show ALL wins from this day */}
                   {selectedEntry.wins && selectedEntry.wins.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {selectedEntry.wins.map((win, idx) => (
