@@ -68,6 +68,11 @@ export default function GardenView({ momMode }) {
 
   // Responsive gap calculation
   const gridGap = windowWidth < 768 ? '4px' : windowWidth < 1200 ? '6px' : '8px'
+  
+  // Responsive meadow height
+  const isMobile = windowWidth < 768
+  const isDesktop = windowWidth >= 1024
+  const meadowHeight = isMobile ? '45vh' : isDesktop ? '55vh' : '50vh'
 
   return (
     <div
@@ -75,22 +80,25 @@ export default function GardenView({ momMode }) {
         display: 'flex',
         flexDirection: 'column',
         padding: '12px',
-        minHeight: '100vh',
+        height: '100%',
         backgroundColor: '#FDFBF7',
         boxSizing: 'border-box',
+        gap: '12px',
       }}
     >
-      {/* ── 1. MEADOW SCENE (50vh) ────────────────────────────── */}
+      {/* ── 1. MEADOW SCENE (responsive height) ────────────────────────────── */}
       <div
         style={{
-          height: '50vh',
+          height: meadowHeight,
           position: 'relative',
           backgroundImage: `url(${staticBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           overflow: 'hidden',
           borderRadius: '30px',
           border: '1px solid rgba(139, 94, 46, 0.1)',
+          flexShrink: 0,
         }}
       >
         {/* Sunset overlay when Mom Mode is 'sunset' */}
@@ -136,6 +144,7 @@ export default function GardenView({ momMode }) {
                   width: '100%',
                   height: 'auto',
                   filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.08))',
+                  display: 'block',
                 }}
               />
             </div>
@@ -201,6 +210,7 @@ export default function GardenView({ momMode }) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
+            minHeight: 0,
           }}
         >
           <p
@@ -296,6 +306,7 @@ function FloralGrid({ entries, flowerAssets, gap }) {
         gridTemplateColumns: 'repeat(11, 1fr)',
         background: 'rgba(253, 251, 247, 0.5)',
         gap: gap,
+        width: '100%',
       }}
     >
       {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -347,7 +358,7 @@ function FloralGrid({ entries, flowerAssets, gap }) {
               />
             )}
 
-            {/* PHASE 3C FIX: Changed from 🌙 to ☕ for consistency */}
+            {/* PHASE 3C: Changed from 🌙 to ☕ for consistency */}
             {entry?.mode === 'rest' && (
               <span style={{ fontSize: '20px' }}>☕</span>
             )}
