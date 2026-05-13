@@ -6,16 +6,21 @@ import {
   formatDate,
   todayKey,
 } from '../utils/storage'
+import {getAffirmation} from '../utils/affirmations'
 
 // ── IMPORT ASSETS ──
 import staticBg from '../assets/static-background.png'
 import dahliaImg from '../assets/pink_dahlia.png'
-import tulipImg from '../assets/Purple & Pink Tulips.png'
+import tulipImg from '../assets/pink_purple_tulip.png'
 import marigoldImg from '../assets/sunset_marigold.png'
 import saplingImg from '../assets/Small Sapling_Tree.png'
 import succulentImg from '../assets/Small Succulent.png'
+import lavenderImg from '../assets/lavender_tulip.png'
+import mintDaisyImg from '../assets/mint_daisy.png'
+import peachRoseImg from '../assets/peach_rose.png'
+import pinkpurpleDahliaImg from '../assets/pink_purple_dahlia.png'
 
-const FLOWER_ASSETS = [dahliaImg, tulipImg, marigoldImg, saplingImg, succulentImg]
+const FLOWER_ASSETS = [dahliaImg, tulipImg, marigoldImg, saplingImg, succulentImg, lavenderImg, mintDaisyImg, peachRoseImg, pinkpurpleDahliaImg]
 
 const MEADOW_COORDINATES = [
   { top: '72%', left: '15%', scale: 0.8 },
@@ -36,7 +41,7 @@ const MEADOW_COORDINATES = [
   { top: '89%', left: '50%', scale: 1.25 },
 ]
 
-export default function GardenView({ momMode }) {
+export default function GardenView({ momMode, isResting }) {
   const [monthEntries, setMonthEntries] = useState([])
   const [monthWinCount, setMonthWinCount] = useState(0) // FIXED: Current month only
   const [monthPlantCount, setMonthPlantCount] = useState(0) // FIXED: Count plants in grid
@@ -44,6 +49,7 @@ export default function GardenView({ momMode }) {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1024
   )
+  const affirmation = getAffirmation(allTimeStreak, isResting)
 
   useEffect(() => {
     const now = new Date()
@@ -93,7 +99,7 @@ export default function GardenView({ momMode }) {
         gap: '12px',
       }}
     >
-      {/* ── 1. MEADOW SCENE (responsive height) ────────────────────────────── */}
+      {/* 1. MEADOW SCENE (responsive height)  */}
       <div
         style={{
           height: meadowHeight,
@@ -158,6 +164,24 @@ export default function GardenView({ momMode }) {
             </div>
           )
         })}
+      </div>
+
+      {/* New: Daily Affirmation */}
+      <div style={{
+        margin: '12px 0',
+        padding: '12px 16px',
+        background: 'rgba(141, 170, 145, 0.1)',
+        borderLeft: '3px solid #8DAA91',
+        borderRadius: '8px',
+      }}>
+        <p style={{
+          fontFamily: '"Lora", Georgia, serif',
+          fontSize: '14px',
+          color: '#5C8C64',
+          fontStyle: 'italic',
+        }}>
+          {affirmation}
+        </p>
       </div>
 
       {/* ── 2. GARDEN INFO & STATS (responsive, fills remaining space) ────────────────────────── */}
