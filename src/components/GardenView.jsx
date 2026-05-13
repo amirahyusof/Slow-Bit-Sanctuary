@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import {
-  getAllEntriesSorted,
   getEntriesForMonth,
   getMonthWinCount,
   getCurrentStreak,
   formatDate,
+  todayKey,
 } from '../utils/storage'
 
 // ── IMPORT ASSETS ──
@@ -37,38 +37,45 @@ const MEADOW_COORDINATES = [
 ]
 
 export default function GardenView({ momMode }) {
-  const [entries, setEntries] = useState([])
   const [monthEntries, setMonthEntries] = useState([])
-  const [winCount, setWinCount] = useState(0)
-  const [streak, setStreak] = useState(0)
+  const [monthWinCount, setMonthWinCount] = useState(0) // FIXED: Current month only
+  const [monthPlantCount, setMonthPlantCount] = useState(0) // FIXED: Count plants in grid
+  const [allTimeStreak, setAllTimeStreak] = useState(0) // All-time streak
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1024
   )
 
   useEffect(() => {
-    const all = getAllEntriesSorted()
-    setEntries(all)
     const now = new Date()
+    
+    // Get current month entries
     const month = getEntriesForMonth(now.getFullYear(), now.getMonth() + 1)
     setMonthEntries(month)
-    setWinCount(getMonthWinCount(now.getFullYear(), now.getMonth() + 1))
-    setStreak(getCurrentStreak())
+    
+    // FIXED: Count wins in current month only
+    setMonthWinCount(getMonthWinCount(now.getFullYear(), now.getMonth() + 1))
+    
+    // FIXED: Count plants (win entries) in current month only
+    const currentMonthPlants = month.filter((e) => e.mode === 'win').length
+    setMonthPlantCount(currentMonthPlants)
+    
+    // All-time streak
+    setAllTimeStreak(getCurrentStreak())
   }, [])
 
-  // Track window width for responsive grid gap
+  // Track window width for responsive layout
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const plantEntries = entries.filter((e) => e.mode === 'win')
+  // FIXED: Filter to CURRENT MONTH wins only (not all-time)
+  const currentMonthWins = monthEntries.filter((e) => e.mode === 'win')
+
   const now = new Date()
   const monthName = now.toLocaleString('en-GB', { month: 'long', year: 'numeric' })
 
-  // Responsive gap calculation
-  const gridGap = windowWidth < 768 ? '4px' : windowWidth < 1200 ? '6px' : '8px'
-  
   // Responsive meadow height
   const isMobile = windowWidth < 768
   const isDesktop = windowWidth >= 1024
@@ -107,16 +114,16 @@ export default function GardenView({ momMode }) {
             style={{
               position: 'absolute',
               inset: 0,
-              background:
-                'linear-gradient(180deg, rgba(255,140,0,0.2) 0%, rgba(255,69,0,0.1) 100%)',
+              background: 
+              'linear-gradient(180deg, rgba(255,140,0,0.2) 0%, rgba(255,69,0,0.1) 100%)',
               pointerEvents: 'none',
               zIndex: 1,
             }}
           />
         )}
 
-        {/* Render flower assets in meadow */}
-        {plantEntries.slice(0, MEADOW_COORDINATES.length).map((entry, i) => {
+        {/* FIXED: Show CURRENT MONTH wins only in meadow */}
+        {currentMonthWins.slice(0, MEADOW_COORDINATES.length).map((entry, i) => {
           const coord = MEADOW_COORDINATES[i]
           const flowerImg = FLOWER_ASSETS[i % FLOWER_ASSETS.length]
 
@@ -128,7 +135,8 @@ export default function GardenView({ momMode }) {
                 top: coord.top,
                 left: coord.left,
                 zIndex: parseInt(coord.top),
-                transform: `scale(${coord.scale}) translate(-50%, -100%)`,
+                // FIXED: Flowers anchored to soil (use -85% instead of -100%)
+                transform: `scale(${coord.scale}) translate(-50%, -85%)`,
                 width: '100px',
                 mixBlendMode: 'normal',
                 opacity: 0.95,
@@ -152,7 +160,7 @@ export default function GardenView({ momMode }) {
         })}
       </div>
 
-      {/* ── 2. GARDEN INFO & STATS (50vh) ────────────────────────── */}
+      {/* ── 2. GARDEN INFO & STATS (responsive, fills remaining space) ────────────────────────── */}
       <div
         style={{
           flex: 1,
@@ -190,12 +198,14 @@ export default function GardenView({ momMode }) {
                 margin: 0,
               }}
             >
-              {winCount} plant{winCount !== 1 ? 's' : ''} grown this month
+              {/* FIXED: Show current month plant count */}
+              {monthPlantCount} plant{monthPlantCount !== 1 ? 's' : ''} grown this month
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <StatChip value={winCount} label="Logged" />
-            <StatChip value={streak} label="Day Streak" />
+            {/* FIXED: StatChips show current month only */}
+            <StatChip value={monthPlantCount} label="This Month" />
+            <StatChip value={allTimeStreak} label="Current Streak" />
           </div>
         </div>
 
@@ -223,21 +233,17 @@ export default function GardenView({ momMode }) {
           >
             this month at a glance
           </p>
-          <FloralGrid
-            entries={monthEntries}
-            flowerAssets={FLOWER_ASSETS}
-            gap={gridGap}
-          />
+          <FloralGrid entries={monthEntries} flowerAssets={FLOWER_ASSETS} />
         </div>
       </div>
 
       <style>{`
         @keyframes sway {
           0%, 100% {
-            transform: scale(var(--tw-scale-x, 1)) rotate(-1.5deg) translate(-50%, -100%);
+            transform: scale(var(--tw-scale-x, 1)) rotate(-1.5deg) translate(-50%, -85%);
           }
           50% {
-            transform: scale(var(--tw-scale-x, 1)) rotate(1.5deg) translate(-50%, -100%);
+            transform: scale(var(--tw-scale-x, 1)) rotate(1.5deg) translate(-50%, -85%);
           }
         }
       `}</style>
@@ -287,7 +293,7 @@ function StatChip({ value, label }) {
 }
 
 // ── FloralGrid Component (Linear 11-column grid) ──────────────────────
-function FloralGrid({ entries, flowerAssets, gap }) {
+function FloralGrid({ entries, flowerAssets }) {
   const now = new Date()
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
 
@@ -305,7 +311,7 @@ function FloralGrid({ entries, flowerAssets, gap }) {
         display: 'grid',
         gridTemplateColumns: 'repeat(11, 1fr)',
         background: 'rgba(253, 251, 247, 0.5)',
-        gap: gap,
+        gap: '6px',
         width: '100%',
       }}
     >
@@ -340,8 +346,7 @@ function FloralGrid({ entries, flowerAssets, gap }) {
             onMouseEnter={(e) => {
               if (entry) {
                 e.currentTarget.style.transform = 'scale(1.1)'
-                e.currentTarget.style.boxShadow =
-                  '0 2px 8px rgba(194,163,138,0.2)'
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(194,163,138,0.2)'
               }
             }}
             onMouseLeave={(e) => {
@@ -358,7 +363,7 @@ function FloralGrid({ entries, flowerAssets, gap }) {
               />
             )}
 
-            {/* PHASE 3C: Changed from 🌙 to ☕ for consistency */}
+            {/* Rest icon - Changed from 🌙 to ☕ for consistency */}
             {entry?.mode === 'rest' && (
               <span style={{ fontSize: '20px' }}>☕</span>
             )}
