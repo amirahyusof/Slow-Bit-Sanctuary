@@ -1,7 +1,6 @@
-// App.jsx — Phase 3C: Adaptive Navigation + Responsive Layout
-// Desktop: FloatingRail on RIGHT side
-// Mobile/Tablet: BottomNav at BOTTOM
-// Switch at 1024px breakpoint
+// App.jsx — Phase 3C: FIXED - No padding from main container
+// FloatingRail is positioned OUTSIDE the main app container
+// Main container stays full width, FloatingRail overlays on top
 
 import { useState, useEffect } from 'react'
 import BottomNav from './components/BottomNav'
@@ -89,8 +88,10 @@ export default function App() {
         alignItems: 'flex-start',
         backgroundColor: '#EDE4D8',
         padding: isMobile ? '8px' : isTablet ? '12px' : '24px',
+        position: 'relative',
       }}
     >
+      {/* FIXED: Removed paddingRight from here - FloatingRail is outside this container */}
       <div
         style={{
           width: isMobile ? '100%' : isTablet ? '95%' : '100%',
@@ -107,8 +108,6 @@ export default function App() {
           flexDirection: 'column',
           height: '100vh',
           maxHeight: '100vh',
-          // PHASE 3C: Add right padding on desktop to avoid content hidden behind FloatingRail
-          paddingRight: isDesktop ? '110px' : '0',
         }}
       >
         {/* ── Top bar ──────────────────────────────────── */}
@@ -202,12 +201,12 @@ export default function App() {
           {renderPage()}
         </main>
 
-        {/* ── PHASE 3C: Conditional Navigation ────────────── */}
+        {/* ── Conditional Navigation ────────────────────── */}
         {/* BottomNav for mobile/tablet */}
         {!isDesktop && <BottomNav activePage={activePage} onNavigate={handleNavigate} />}
       </div>
 
-      {/* ── PHASE 3C: FloatingRail for desktop (fixed position) ── */}
+      {/* ── FloatingRail for desktop (FIXED position outside main container) ── */}
       {isDesktop && (
         <FloatingRail
           activePage={activePage}
