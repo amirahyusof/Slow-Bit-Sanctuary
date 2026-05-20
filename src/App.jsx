@@ -56,19 +56,16 @@ export default function App() {
     setMomMode(next)
     saveMomMode(next)
   }
-
+  
   function renderPage() {
+    const theme = THEMES[momMode]
+    
     switch (activePage) {
-      case 'garden':
-        return <GardenView key={refreshKey} momMode={momMode} />
-      case 'today':
-        return <TodayView key={refreshKey} momMode={momMode} />
-      case 'calendar':
-        return <CalendarView key={refreshKey} />
-      case 'log':
-        return <LogView key={refreshKey} />
-      default:
-        return <GardenView key={refreshKey} momMode={momMode} />
+      case 'garden':   return <GardenView   key={refreshKey} momMode={momMode} theme={theme} />
+      case 'today':    return <TodayView    key={refreshKey} momMode={momMode} theme={theme} />
+      case 'calendar': return <CalendarView key={refreshKey} momMode={momMode} theme={theme} />
+      case 'log':      return <LogView      key={refreshKey} momMode={momMode} theme={theme} />
+      default:         return <GardenView   key={refreshKey} momMode={momMode} theme={theme} />
     }
   }
 
@@ -191,10 +188,6 @@ export default function App() {
           }}
         >
           {renderPage()}
-          <GardenView theme={theme} momMode={momMode} />
-          <TodayView theme={theme} momMode={momMode} />
-          <CalendarView theme={theme} momMode={momMode} />
-          <LogView theme={theme} momMode={momMode} />
         </main>
 
         {/* ── Conditional Navigation ────────────────────── */}
