@@ -236,7 +236,7 @@ function WinSlot({ slotNumber, existingWin, isActive, onSubmit, isResting }) {
 // ─────────────────────────────────────────────────────────────
 // MAIN COMPONENT — TodayView
 // ─────────────────────────────────────────────────────────────
-export default function TodayView() {
+export default function TodayView({momMode, theme}) {
   const [todayWins, setTodayWins] = useState([])
   const [winCount, setWinCount] = useState(0)
   const [recentWins, setRecentWins] = useState([])
