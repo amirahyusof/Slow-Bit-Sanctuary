@@ -272,10 +272,16 @@ export default function TodayView({momMode, theme}) {
 
   // PHASE 4B: WARM NIGHT MODE COLORS (Expert UI/UX approved)
   const sceneBg = isResting
-    ? 'linear-gradient(180deg, #2d1810 0%, #3d2818 100%)' // Warm brown (cozy rest)
-    : 'linear-gradient(180deg, #FDE8D0 0%, #FFF8F0 100%)' // Day mode
+    ? 'linear-gradient(180deg, #2d1810 0%, #3d2818 100%)' // Always warm brown for rest
+    : momMode === 'sunset'
+    ? 'linear-gradient(180deg, #F4A87C 0%, #F4D4A0 100%)' // Sunset mode
+    : 'linear-gradient(180deg, #FDE8D0 0%, #FFF8F0 100%)' // Bright day mode
 
-  const bgColor = isResting ? '#1a1410' : '#fff' // Warm charcoal vs white
+  const bgColor = isResting 
+    ? '#1a1410'  // Warm charcoal (rest)
+    : momMode === 'sunset'
+    ? '#FFF0DC'  // Warm cream (sunset)
+    : '#FFF8F0'  // Soft white (day)
 
   return (
     <div
