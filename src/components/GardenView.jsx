@@ -20,7 +20,21 @@ import mintDaisyImg from '../assets/mint_daisy.png'
 import peachRoseImg from '../assets/peach_rose.png'
 import pinkpurpleDahliaImg from '../assets/pink_purple_dahlia.png'
 
-const FLOWER_ASSETS = [dahliaImg, tulipImg, marigoldImg, saplingImg, succulentImg, lavenderImg, mintDaisyImg, peachRoseImg, pinkpurpleDahliaImg]
+import {setFlowerAssets, getFlowerImage} from '../utils/flowerMatcher'
+
+const FLOWER_ASSETS = [
+  dahliaImg, 
+  tulipImg, 
+  marigoldImg, 
+  saplingImg, 
+  succulentImg, 
+  lavenderImg, 
+  mintDaisyImg, 
+  peachRoseImg, 
+  pinkpurpleDahliaImg
+]
+
+setFlowerAssets(FLOWER_ASSETS) // Initialize flower assets in matcher
 
 const MEADOW_COORDINATES = [
   { top: '72%', left: '15%', scale: 0.8 },
@@ -131,7 +145,7 @@ export default function GardenView({ momMode, isResting }) {
         {/* FIXED: Show CURRENT MONTH wins only in meadow */}
         {currentMonthWins.slice(0, MEADOW_COORDINATES.length).map((entry, i) => {
           const coord = MEADOW_COORDINATES[i]
-          const flowerImg = FLOWER_ASSETS[i % FLOWER_ASSETS.length]
+          const flowerImg = getFlowerImage(entry.wins[0]?.flower || 'pink-dahlia')
 
           return (
             <div
@@ -257,7 +271,7 @@ export default function GardenView({ momMode, isResting }) {
           >
             this month at a glance
           </p>
-          <FloralGrid entries={monthEntries} flowerAssets={FLOWER_ASSETS} />
+          <FloralGrid entries={monthEntries} />
         </div>
       </div>
 
@@ -317,7 +331,7 @@ function StatChip({ value, label }) {
 }
 
 // ── FloralGrid Component (Linear 11-column grid) ──────────────────────
-function FloralGrid({ entries, flowerAssets }) {
+function FloralGrid({ entries }) {
   const now = new Date()
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
 
@@ -343,7 +357,6 @@ function FloralGrid({ entries, flowerAssets }) {
         const day = i + 1
         const entry = entryMap[day]
         const isToday = day === todayDate
-        const flowerImg = flowerAssets[i % flowerAssets.length]
 
         return (
           <div
@@ -381,7 +394,7 @@ function FloralGrid({ entries, flowerAssets }) {
             {/* Display flower for win days */}
             {entry?.mode === 'win' && (
               <img
-                src={flowerImg}
+                src={getFlowerImage(entry.wins[0]?.flower || 'pink-dahlia')}
                 alt="win"
                 style={{ width: '75%', height: '75%', objectFit: 'contain' }}
               />
