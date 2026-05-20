@@ -13,7 +13,7 @@ const FLOWER_NAMES = {
   'sunset-marigold': '🌻 sunset marigold',
 }
 
-export default function LogView() {
+export default function LogView({momMode, theme}) {
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
@@ -30,7 +30,8 @@ export default function LogView() {
       <div
         style={{
           padding: '20px 18px 12px',
-          background: 'linear-gradient(to bottom, rgba(253,235,198,0.3), transparent)',
+          background: theme.shell,
+          transition: 'background-color 2000ms ease',
           borderBottom: '1px solid rgba(194,163,138,0.1)',
         }}
       >

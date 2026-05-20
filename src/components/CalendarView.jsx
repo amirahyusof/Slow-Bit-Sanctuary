@@ -15,7 +15,7 @@ const FLOWER_NAMES = {
   'sunset-marigold': '🌻 sunset marigold',
 }
 
-export default function CalendarView() {
+export default function CalendarView({ theme, momMode }) {
   const [selectedDay, setSelectedDay] = useState(null)
   const [displayMonth, setDisplayMonth] = useState(new Date().getMonth())
   const [displayYear, setDisplayYear] = useState(new Date().getFullYear())
@@ -76,6 +76,9 @@ export default function CalendarView() {
 
   const selectedEntry = selectedDay ? entryMap[selectedDay] : null
 
+  // Determine background color based on Mom Mode
+
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* ── Header with navigation ──────────────────────── */}
@@ -85,7 +88,8 @@ export default function CalendarView() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 18px 8px',
-          background: 'linear-gradient(to bottom, rgba(253,235,198,0.4), transparent)',
+          background: theme.shell,
+          transition: 'background-color 2000ms ease',
         }}
       >
         <button
