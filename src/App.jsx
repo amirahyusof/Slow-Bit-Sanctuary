@@ -16,13 +16,13 @@ const THEMES = {
     bg: '#FDE8D0',
     shell: '#FFF8F0',
     border: '#D4BCA8',
-    label: '☀️ bright day',
+    label: '☀️ Bright Day',
   },
   sunset: {
     bg: '#F4A87C',
     shell: '#FFF0DC',
     border: '#C8784A',
-    label: '✦ warm sunset',
+    label: '✦ Warm Sunset',
   },
 }
 
@@ -78,6 +78,7 @@ export default function App() {
   const isMobile = windowWidth < 768
   const isTablet = windowWidth >= 768 && windowWidth < 1024
   const isDesktop = windowWidth >= 1024
+  const borderRadius = isMobile ? '12px' : isTablet ? '20px' : '8px'
 
   return (
     <div
@@ -87,7 +88,7 @@ export default function App() {
         justifyContent: 'center',
         alignItems: 'flex-start',
         backgroundColor: '#EDE4D8',
-        padding: isMobile ? '8px' : isTablet ? '12px' : '24px',
+        padding: isMobile ? '8px' : isTablet ? '12px' : '8px',
         position: 'relative',
       }}
     >
@@ -97,13 +98,13 @@ export default function App() {
           width: isMobile ? '100%' : isTablet ? '95%' : '100%',
           maxWidth: isDesktop ? '1400px' : 'none',
           border: `2px solid ${theme.border}`,
-          borderRadius: isMobile ? '12px' : '24px',
+          borderRadius: borderRadius,
           overflow: 'hidden',
           backgroundColor: theme.shell,
           boxShadow: isMobile
             ? '0 2px 12px rgba(139,94,46,0.08)'
             : '0 4px 24px rgba(139,94,46,0.12)',
-          transition: 'background-color 2000ms ease, border-color 2000ms ease',
+          transition: 'background-color 2000ms ease, border-color 2000ms ease, border-radius 300ms ease',
           display: 'flex',
           flexDirection: 'column',
           height: '100vh',
@@ -128,17 +129,6 @@ export default function App() {
           }}
         >
           <div>
-            <p
-              style={{
-                fontFamily: '"Lora", Georgia, serif',
-                fontSize: isMobile ? '11px' : isTablet ? '12px' : '14px',
-                color: '#4A3728',
-                margin: '0 0 2px',
-                fontStyle: 'italic',
-              }}
-            >
-              the
-            </p>
             <p
               style={{
                 fontFamily: '"Lora", Georgia, serif',
@@ -196,9 +186,15 @@ export default function App() {
             overflowY: 'auto',
             overflowX: 'hidden',
             padding: isMobile ? '0' : isTablet ? '0' : isDesktop ? '16px' : '0',
+            backgroundColor: theme.shell,
+            transition: 'background-color 2000ms ease',
           }}
         >
           {renderPage()}
+          <GardenView theme={theme} momMode={momMode} />
+          <TodayView theme={theme} momMode={momMode} />
+          <CalendarView theme={theme} momMode={momMode} />
+          <LogView theme={theme} momMode={momMode} />
         </main>
 
         {/* ── Conditional Navigation ────────────────────── */}
