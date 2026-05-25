@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import {
   getEntriesForMonth,
   getMonthWinCount,
@@ -7,6 +7,7 @@ import {
   todayKey,
 } from '../utils/storage'
 import {getAffirmation} from '../utils/affirmations'
+import { detectMonthChange, getMonthResetMessage } from '../utils/monthlyReset'
 
 // ── IMPORT ASSETS ──
 import staticBg from '../assets/static-background.png'
@@ -55,7 +56,7 @@ const MEADOW_COORDINATES = [
   { top: '89%', left: '50%', scale: 1.25 },
 ]
 
-export default function GardenView({ momMode, isResting }) {
+export default function GardenView({ momMode, theme, isResting }) {
   const [monthEntries, setMonthEntries] = useState([])
   const [monthWinCount, setMonthWinCount] = useState(0) // FIXED: Current month only
   const [monthPlantCount, setMonthPlantCount] = useState(0) // FIXED: Count plants in grid
@@ -64,6 +65,44 @@ export default function GardenView({ momMode, isResting }) {
     typeof window !== 'undefined' ? window.innerWidth : 1024
   )
   const affirmation = getAffirmation(allTimeStreak, isResting)
+
+  const [isMonthChanged, setIsMonthChanged] = useState(false)
+  const [monthResetMessage, setMonthResetMessage] = useState('')
+  const [showResetAnimation, setShowResetAnimation] = useState(false)
+
+  useEffect(() => {
+    const now = new Date()
+
+    //Detect month change
+    const { hasChanged, currentMonth } = detectMonthChange()
+      if (hasChanged) {
+        //trigger animation
+        setIsMonthChange(true)
+        setMonthResetMessage(getmonthResetMessage(allTimeStreak))
+        setShowResetAnimation(true) 
+
+        //auto-hide animation after 5 seconds
+        const timer =setTimeout(() => {
+          setShowResetAnimation(false)
+          setIsMonthChange(false)
+        }, 5000)
+
+        return () => clearTimeout(timer)
+      }
+    
+    // Get current month entries
+    const month = getEntriesForMonth(now.getFullYear(), now.getMonth() + 1)
+    setMonthEntries(month)
+ 
+    // Count plants (win entries) in current month only
+    const currentMonthPlants = month.filter(e => e.mode === 'win').length
+    setMonthPlantCount(currentMonthPlants)
+ 
+    // All-time streak
+    setAllTimeStreak(getCurrentStreak())
+  }, [])
+
+
 
   useEffect(() => {
     const now = new Date()
@@ -108,11 +147,37 @@ export default function GardenView({ momMode, isResting }) {
         flexDirection: 'column',
         padding: '12px',
         height: '100%',
-        backgroundColor: '#FDFBF7',
+        backgroundColor: theme?.shell ||'#FDFBF7',
         boxSizing: 'border-box',
         gap: '12px',
       }}
     >
+      {/* ✅ MONTHLY RESET MESSAGE (Appears on month change) */}
+      {isMonthChanged && (
+        <div
+          style={{
+            padding: '16px',
+            background: 'rgba(141, 170, 145, 0.2)',
+            border: '2px solid rgba(141, 170, 145, 0.5)',
+            borderRadius: '12px',
+            textAlign: 'center',
+            animation: 'fadeInNewMonth 0.8s ease-out',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: '"Lora", serif',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#5C8C64',
+              margin: 0,
+            }}
+          >
+            {monthResetMessage}
+          </p>
+        </div>
+      )}
+
       {/* 1. MEADOW SCENE (responsive height)  */}
       <div
         style={{
@@ -126,6 +191,9 @@ export default function GardenView({ momMode, isResting }) {
           borderRadius: '30px',
           border: '1px solid rgba(139, 94, 46, 0.1)',
           flexShrink: 0,
+           // ✅ FADE ANIMATION ON MONTH CHANGE
+          opacity: showResetAnimation ? 0.3 : 1,
+          transition: 'opacity 1.5s ease-out',
         }}
       >
         {/* Sunset overlay when Mom Mode is 'sunset' */}
