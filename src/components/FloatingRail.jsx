@@ -18,33 +18,7 @@ function GardenIcon({ active }) {
   )
 }
 
-function TodayIcon({ active }) {
-  const c = active ? '#C2A38A' : '#A88C74'
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="8" width="12" height="9" rx="3" fill={active ? '#C9B8D8' : '#D4BCA8'} />
-      <path d="M 15 10 Q 19 9 20 8 Q 20 11 18 12 Q 15 12 15 11 Z" fill={active ? '#B8A8C8' : '#C4B4A4'} />
-      <path d="M 4 7 Q 4 4 6 4 Q 8 3 9 5" stroke={c} strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      {active && <ellipse cx="18" cy="15" rx="1.2" ry="2" fill="#B8E8D0" opacity="0.9" />}
-    </svg>
-  )
-}
-
-function CalendarIcon({ active }) {
-  const c = active ? '#C9B8D8' : '#D4BCA8'
-  const tc = active ? '#7A5C8C' : '#A88C74'
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="2" y="4" width="18" height="15" rx="3" fill={c} />
-      <rect x="2" y="4" width="18" height="5" rx="3" fill={active ? '#B8A8C8' : '#C4B4A4'} />
-      <circle cx="7" cy="13" r="1.5" fill={active ? '#F4B8C8' : '#C4B4A4'} />
-      <circle cx="11" cy="13" r="1.5" fill={active ? '#8DAA91' : '#C4B4A4'} />
-      <circle cx="15" cy="13" r="1.5" fill={tc} opacity="0.7" />
-    </svg>
-  )
-}
-
-function LogIcon({ active }) {
+function JournalIcon({ active }) {
   const c = active ? '#8DAA91' : '#A88C74'
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -59,9 +33,7 @@ function LogIcon({ active }) {
 
 const TABS = [
   { id: 'garden', label: 'Garden', Icon: GardenIcon },
-  { id: 'today', label: 'Today', Icon: TodayIcon },
-  { id: 'calendar', label: 'Calendar', Icon: CalendarIcon },
-  { id: 'log', label: 'Log', Icon: LogIcon },
+  { id: 'journal', label: 'Journal', Icon: JournalIcon },
 ]
 
 export default function FloatingRail({ activePage, onNavigate, momMode }) {
