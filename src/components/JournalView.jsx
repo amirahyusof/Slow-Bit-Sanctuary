@@ -13,7 +13,7 @@ const FLOWER_NAMES = {
   'sunset-marigold': '🌻 sunset marigold',
 }
 
-export default function LogView({momMode, theme}) {
+export default function JournalView({momMode, theme}) {
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function LogView({momMode, theme}) {
             margin: '0 0 4px',
           }}
         >
-          Builder's Log
+          Builder's Journal
         </h1>
         <p
           style={{
@@ -54,7 +54,7 @@ export default function LogView({momMode, theme}) {
             margin: 0,
           }}
         >
-          your honest garden journal
+          Your honest garden journal
         </p>
 
         {/* Summary stats */}
@@ -114,7 +114,7 @@ export default function LogView({momMode, theme}) {
           >
             Your garden journal is empty.
             <br />
-            Head to <strong>"Today"</strong> to plant your first win. 🌱
+            Head to <strong>"Garden"</strong> to plant your first honest win. 🌱
           </p>
         </div>
       )}
@@ -129,7 +129,7 @@ export default function LogView({momMode, theme}) {
         }}
       >
         {entries.map((entry, index) => (
-          <LogEntry key={`${entry.key}-${entry.winIndex || 0}`} entry={entry} index={index} />
+          <JournalEntry key={`${entry.key}-${entry.winIndex || 0}`} entry={entry} index={index} />
         ))}
       </div>
 
@@ -154,8 +154,8 @@ export default function LogView({momMode, theme}) {
   )
 }
 
-// ── Single log entry ───────────────────────────────────────
-function LogEntry({ entry, index }) {
+// ── Single journal entry ───────────────────────────────────────
+function JournalEntry({ entry, index }) {
   const isRest = entry.mode === 'rest'
   const hasMultipleWins = entry.mode === 'win' && entry.wins && entry.wins.length > 1
 
