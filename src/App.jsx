@@ -6,9 +6,7 @@ import { useState, useEffect } from 'react'
 import BottomNav from './components/BottomNav'
 import FloatingRail from './components/FloatingRail'
 import GardenView from './components/GardenView'
-import TodayView from './components/TodayView'
-import CalendarView from './components/CalendarView'
-import LogView from './components/LogView'
+import JournalView from './components/JournalView'
 import { saveMomMode, loadMomMode } from './utils/storage'
 
 const THEMES = {
@@ -62,9 +60,7 @@ export default function App() {
     
     switch (activePage) {
       case 'garden':   return <GardenView   key={refreshKey} momMode={momMode} theme={theme} />
-      case 'today':    return <TodayView    key={refreshKey} momMode={momMode} theme={theme} />
-      case 'calendar': return <CalendarView key={refreshKey} momMode={momMode} theme={theme} />
-      case 'log':      return <LogView      key={refreshKey} momMode={momMode} theme={theme} />
+      case 'journal':  return <JournalView  key={refreshKey} momMode={momMode} theme={theme} />
       default:         return <GardenView   key={refreshKey} momMode={momMode} theme={theme} />
     }
   }
