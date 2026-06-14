@@ -17,7 +17,7 @@ import { getAffirmation } from '../utils/affirmations'
 // ── Asset imports ─────────────────────────────────────────────
 import staticBg     from '../assets/static-background.png'
 import dahliaImg    from '../assets/pink_dahlia.png'
-import tulipImg     from '../assets/Purple & Pink Tulips.png'
+import tulipImg     from '../assets/pink_purple_tulip.png'
 import marigoldImg  from '../assets/sunset_marigold.png'
 import saplingImg   from '../assets/Small Sapling_Tree.png'
 import succulentImg from '../assets/Small Succulent.png'
