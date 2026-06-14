@@ -1,117 +1,101 @@
-// LogView.jsx — Phase 3C: Rest Icon Consistency
-// Changed from no icon to ☕ (coffee) for rest entries to match theme
+// JournalView.jsx — v3.0
+// A quiet diary. Every entry ever written, newest first, grouped by month.
+// No stats. No editing. No deleting. Just your words.
 
 import { useState, useEffect } from 'react'
 import { getAllEntriesSorted, formatDate } from '../utils/storage'
-import WatercolorPlant, { getGrowthStage } from './WatercolorPlant'
 
 const FLOWER_NAMES = {
-  'pink-dahlia': '🌸 pink dahlia',
-  'lavender-tulip': '🌷 lavender tulip',
-  'mint-daisy': '🌼 mint daisy',
-  'peach-rose': '🌹 peach rose',
+  'pink-dahlia':     '🌸 pink dahlia',
+  'lavender-tulip':  '🌷 lavender tulip',
+  'mint-daisy':      '🌼 mint daisy',
+  'peach-rose':      '🌹 peach rose',
   'sunset-marigold': '🌻 sunset marigold',
 }
 
-export default function JournalView({momMode, theme}) {
+// "2026-05-14" → "May 2026"
+function monthLabel(key) {
+  const [y, m] = key.split('-').map(Number)
+  return new Date(y, m - 1, 1).toLocaleString('en-GB', { month: 'long', year: 'numeric' })
+}
+
+// Group a flat sorted array of entries by their month
+function groupByMonth(entries) {
+  const groups = []
+  let currentLabel = null
+  let currentGroup = []
+
+  entries.forEach(entry => {
+    const label = monthLabel(entry.key)
+    if (label !== currentLabel) {
+      if (currentGroup.length > 0) groups.push({ label: currentLabel, entries: currentGroup })
+      currentLabel = label
+      currentGroup = [entry]
+    } else {
+      currentGroup.push(entry)
+    }
+  })
+
+  if (currentGroup.length > 0) groups.push({ label: currentLabel, entries: currentGroup })
+  return groups
+}
+
+// ── Main component ────────────────────────────────────────────
+
+export default function JournalView() {
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
-    const all = getAllEntriesSorted()
-    setEntries(all)
+    setEntries(getAllEntriesSorted())
   }, [])
 
-  const winEntries = entries.filter((e) => e.mode === 'win')
-  const restEntries = entries.filter((e) => e.mode === 'rest')
+  const groups = groupByMonth(entries)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* ── Header ────────────────────────────────────────── */}
-      <div
-        style={{
-          padding: '20px 18px 12px',
-          background: theme.shell,
-          transition: 'background-color 2000ms ease',
-          borderBottom: '1px solid rgba(194,163,138,0.1)',
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: '"Lora", Georgia, serif',
-            fontSize: '24px',
-            fontWeight: '600',
-            color: '#5C3D1E',
-            margin: '0 0 4px',
-          }}
-        >
-          Builder's Journal
-        </h1>
-        <p
-          style={{
-            fontFamily: '"Indie Flower", cursive',
-            fontSize: '13px',
-            color: '#A88C74',
-            margin: 0,
-          }}
-        >
-          Your honest garden journal
-        </p>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
 
-        {/* Summary stats */}
-        {entries.length > 0 && (
-          <div style={{ display: 'flex', gap: '14px', marginTop: '12px', flexWrap: 'wrap' }}>
-            <span
-              style={{
-                fontFamily: '"Indie Flower", cursive',
-                fontSize: '12px',
-                color: '#81B89A',
-                background: 'rgba(141,170,145,0.15)',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                border: '1px solid rgba(141,170,145,0.3)',
-              }}
-            >
-              {winEntries.length} wins planted
-            </span>
-            <span
-              style={{
-                fontFamily: '"Indie Flower", cursive',
-                fontSize: '12px',
-                color: '#C9B8D8',
-                background: 'rgba(201,184,216,0.15)',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                border: '1px solid rgba(201,184,216,0.3)',
-              }}
-            >
-              {restEntries.length} rest days
-            </span>
-          </div>
-        )}
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div style={{
+        padding:      '20px 20px 14px',
+        borderBottom: '1px solid rgba(194,163,138,0.15)',
+      }}>
+        <h1 style={{
+          fontFamily: '"Lora", Georgia, serif',
+          fontSize:   '22px',
+          fontWeight: '600',
+          color:      '#4A3728',
+          margin:     '0 0 4px',
+        }}>
+          Your Journal
+        </h1>
+        <p style={{
+          fontFamily: '"Indie Flower", cursive',
+          fontSize:   '13px',
+          color:      '#A88C74',
+          margin:     0,
+        }}>
+          Your honest garden journal, where every win and rest day is recorded.
+        </p>
       </div>
 
-      {/* ── Empty state ───────────────────────────────────── */}
+      {/* ── Empty state ────────────────────────────────────── */}
       {entries.length === 0 && (
-        <div
-          style={{
-            padding: '48px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '12px',
-            textAlign: 'center',
-          }}
-        >
-          <p
-            style={{
-              fontFamily: '"Lora", Georgia, serif',
-              fontSize: '16px',
-              color: '#A88C74',
-              lineHeight: '1.8',
-              fontStyle: 'italic',
-              margin: 0,
-            }}
-          >
+        <div style={{
+          flex:           1,
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          padding:        '48px 24px',
+          textAlign:      'center',
+        }}>
+          <p style={{
+            fontFamily: '"Lora", Georgia, serif',
+            fontSize:   '15px',
+            color:      '#A88C74',
+            lineHeight: '1.8',
+            fontStyle:  'italic',
+            margin:     0,
+          }}>
             Your garden journal is empty.
             <br />
             Head to <strong>"Garden"</strong> to plant your first honest win. 🌱
@@ -119,228 +103,167 @@ export default function JournalView({momMode, theme}) {
         </div>
       )}
 
-      {/* ── Entry list ────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '12px 18px 20px',
-          gap: '10px',
-        }}
-      >
-        {entries.map((entry, index) => (
-          <JournalEntry key={`${entry.key}-${entry.winIndex || 0}`} entry={entry} index={index} />
+      {/* ── Entry list grouped by month ─────────────────────── */}
+      <div style={{
+        display:       'flex',
+        flexDirection: 'column',
+        padding:       '8px 20px 32px',
+        gap:           '0',
+      }}>
+        {groups.map(group => (
+          <div key={group.label}>
+
+            {/* Month group header */}
+            <div style={{
+              padding:    '18px 0 8px',
+              display:    'flex',
+              alignItems: 'center',
+              gap:        '10px',
+            }}>
+              <span style={{
+                fontFamily: '"Lora", Georgia, serif',
+                fontSize:   '13px',
+                fontWeight: '600',
+                color:      '#7A5C44',
+              }}>
+                {group.label}
+              </span>
+              <div style={{
+                flex:        1,
+                height:      '1px',
+                background:  'rgba(194,163,138,0.25)',
+              }} />
+            </div>
+
+            {/* Entries in this month */}
+            <div style={{
+              display:       'flex',
+              flexDirection: 'column',
+              gap:           '8px',
+              paddingBottom: '4px',
+            }}>
+              {group.entries.map((entry, index) => (
+                <JournalEntry key={entry.key} entry={entry} index={index} />
+              ))}
+            </div>
+
+          </div>
         ))}
       </div>
 
-      {/* ── CSS animations ────────────────────────────────── */}
       <style>{`
         @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-12px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from { opacity: 0; transform: translateX(-10px); }
+          to   { opacity: 1; transform: translateX(0);     }
         }
       `}</style>
     </div>
   )
 }
 
-// ── Single journal entry ───────────────────────────────────────
+// ── Single entry ──────────────────────────────────────────────
+
 function JournalEntry({ entry, index }) {
   const isRest = entry.mode === 'rest'
-  const hasMultipleWins = entry.mode === 'win' && entry.wins && entry.wins.length > 1
 
+  // Rest day — single compact line
+  if (isRest) {
+    return (
+      <div style={{
+        display:    'flex',
+        alignItems: 'center',
+        gap:        '8px',
+        padding:    '8px 0',
+        animation:  `slideIn 0.3s ease ${index * 0.03}s both`,
+        opacity:    0.7,
+      }}>
+        <span style={{
+          fontFamily: '"Indie Flower", cursive',
+          fontSize:   '11px',
+          color:      '#A88C74',
+          minWidth:   '48px',
+        }}>
+          {formatDate(entry.key).split(' ')[0]} {formatDate(entry.key).split(' ')[1]}
+        </span>
+        <span style={{
+          width:        '1px',
+          height:       '12px',
+          background:   'rgba(194,163,138,0.4)',
+          flexShrink:   0,
+        }} />
+        <span style={{
+          fontFamily: '"Indie Flower", cursive',
+          fontSize:   '12px',
+          color:      '#A88C74',
+        }}>
+          ☕ rest
+        </span>
+      </div>
+    )
+  }
+
+  // Win day — full card
   return (
     <div
       style={{
-        background: isRest
-          ? 'rgba(201, 184, 216, 0.12)'
-          : 'rgba(244, 184, 200, 0.12)',
-        border: `1.5px solid ${isRest ? 'rgba(201,184,216,0.3)' : 'rgba(244,184,200,0.3)'}`,
-        borderRadius: '16px',
-        padding: '16px 16px',
-        display: 'flex',
-        gap: '12px',
-        alignItems: 'flex-start',
-        animation: `slideIn 0.4s ease ${index * 0.04}s both`,
-        transition: 'all 0.2s',
-        cursor: 'default',
+        background:    'rgba(253,251,247,0.8)',
+        border:        '1.5px solid rgba(194,163,138,0.2)',
+        borderRadius:  '14px',
+        padding:       '14px 16px',
+        animation:     `slideIn 0.3s ease ${index * 0.03}s both`,
+        transition:    'all 0.2s ease',
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = isRest
-          ? 'rgba(201, 184, 216, 0.18)'
-          : 'rgba(244, 184, 200, 0.18)'
-        e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(139,94,46,0.08)'
+      onMouseEnter={e => {
+        e.currentTarget.style.background   = 'rgba(244,184,200,0.10)'
+        e.currentTarget.style.borderColor  = 'rgba(244,184,200,0.4)'
+        e.currentTarget.style.transform    = 'translateY(-1px)'
+        e.currentTarget.style.boxShadow    = '0 3px 10px rgba(139,94,46,0.07)'
       }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = isRest
-          ? 'rgba(201, 184, 216, 0.12)'
-          : 'rgba(244, 184, 200, 0.12)'
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = 'none'
+      onMouseLeave={e => {
+        e.currentTarget.style.background   = 'rgba(253,251,247,0.8)'
+        e.currentTarget.style.borderColor  = 'rgba(194,163,138,0.2)'
+        e.currentTarget.style.transform    = 'translateY(0)'
+        e.currentTarget.style.boxShadow    = 'none'
       }}
     >
-      {/* Tiny plant icon (only for single win entries) */}
-      {!isRest && !hasMultipleWins && entry.flower && (
-        <div style={{ flexShrink: 0, marginTop: '2px', opacity: 0.8 }}>
-          <WatercolorPlant
-            flowerType={entry.flower}
-            growthStage={getGrowthStage(entry.timestamp)}
-            size={0.6}
-            animate={false}
-          />
-        </div>
-      )}
+      {/* Date */}
+      <span style={{
+        fontFamily:  '"Indie Flower", cursive',
+        fontSize:    '11px',
+        color:       '#A88C74',
+        display:     'block',
+        marginBottom: '6px',
+      }}>
+        {formatDate(entry.key)}
+      </span>
 
-      {/* PHASE 3C FIX: Rest icon now visible with ☕ */}
-      {isRest && (
-        <div
-          style={{
-            flexShrink: 0,
-            width: '20px',
-            height: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '16px',
-          }}
-        >
-          ☕
-        </div>
-      )}
+      {/* Entry text */}
+      <p style={{
+        fontFamily:   '"Lora", Georgia, serif',
+        fontSize:     '14px',
+        color:        '#4A3728',
+        margin:       '0 0 10px',
+        lineHeight:   '1.6',
+        fontStyle:    'italic',
+      }}>
+        "{entry.text}"
+      </p>
 
-      {/* Entry content */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px',
-          minWidth: 0,
-        }}
-      >
-        {/* Date */}
-        <span
-          style={{
-            fontFamily: '"Indie Flower", cursive',
-            fontSize: '11px',
-            color: '#A88C74',
-            lineHeight: '1.3',
-          }}
-        >
-          {formatDate(entry.key)}
+      {/* Flower badge */}
+      {entry.flower && (
+        <span style={{
+          display:      'inline-block',
+          fontFamily:   '"Indie Flower", cursive',
+          fontSize:     '11px',
+          color:        '#5C8C64',
+          background:   'rgba(141,170,145,0.15)',
+          border:       '1px solid rgba(141,170,145,0.3)',
+          borderRadius: '20px',
+          padding:      '3px 10px',
+        }}>
+          {FLOWER_NAMES[entry.flower] || '🌸 flower'}
         </span>
-
-        {/* Rest message */}
-        {isRest && (
-          <p
-            style={{
-              fontFamily: '"Lora", Georgia, serif',
-              fontSize: '13px',
-              color: '#9B6B4A',
-              margin: 0,
-              fontStyle: 'italic',
-              lineHeight: '1.5',
-            }}
-          >
-            You chose rest today. And that was enough.
-          </p>
-        )}
-
-        {/* Single win (one entry per day) */}
-        {entry.mode === 'win' && entry.wins && entry.wins.length === 1 && (
-          <>
-            <p
-              style={{
-                fontFamily: '"Lora", Georgia, serif',
-                fontSize: '14px',
-                color: '#5C3D1E',
-                margin: 0,
-                lineHeight: '1.5',
-                fontStyle: 'italic',
-              }}
-            >
-              "{entry.wins[0].text}"
-            </p>
-            <div
-              style={{
-                display: 'inline-block',
-                background: 'rgba(141, 170, 145, 0.2)',
-                border: '1px solid rgba(141, 170, 145, 0.4)',
-                padding: '4px 10px',
-                fontFamily: '"Indie Flower", cursive',
-                fontSize: '11px',
-                color: '#5C8C64',
-                borderRadius: '18px',
-                marginTop: '4px',
-                alignSelf: 'flex-start',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
-              }}
-            >
-              {FLOWER_NAMES[entry.wins[0].flower] || '🌸 flower'}
-            </div>
-          </>
-        )}
-
-        {/* Multiple wins (all 3 on same date as one entry) */}
-        {entry.mode === 'win' && entry.wins && entry.wins.length > 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {entry.wins.map((win, idx) => (
-              <div key={idx}>
-                <p
-                  style={{
-                    fontFamily: '"Lora", Georgia, serif',
-                    fontSize: '14px',
-                    color: '#5C3D1E',
-                    margin: '0 0 6px',
-                    lineHeight: '1.5',
-                    fontStyle: 'italic',
-                  }}
-                >
-                  "{win.text}"
-                </p>
-                <div
-                  style={{
-                    display: 'inline-block',
-                    background: 'rgba(141, 170, 145, 0.2)',
-                    border: '1px solid rgba(141, 170, 145, 0.4)',
-                    padding: '4px 10px',
-                    fontFamily: '"Indie Flower", cursive',
-                    fontSize: '11px',
-                    color: '#5C8C64',
-                    borderRadius: '18px',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(141, 170, 145, 0.35)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(141, 170, 145, 0.2)'
-                  }}
-                >
-                  {FLOWER_NAMES[win.flower] || '🌸 flower'}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }
