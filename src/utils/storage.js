@@ -1,32 +1,64 @@
-// storage.js — updated for 3 wins per day
+// storage.js — v3.0
 //
-// Data shape (up to 3 wins per day):
+// One entry per day. One sentence. One flower. No quota.
+//
+// Shape of each entry:
 // {
-//   "2026-04-26": {
-//     wins: [
-//       { text: "fixed the CSS bug", flower: "pink-dahlia", timestamp: 123 },
-//       { text: "read 5 pages",      flower: "lavender-tulip", timestamp: 456 },
-//       { text: "went for a walk",   flower: "mint-daisy", timestamp: 789 },
-//     ],
-//     mode: "win" | "rest",
-//     restTimestamp: null | number,
+//   "2026-05-14": {
+//     text:      "fixed that bug i'd been avoiding all week",
+//     flower:    "lavender-tulip",
+//     mode:      "win" | "rest",
+//     timestamp: 1747180800000
 //   }
 // }
 
 const STORAGE_KEY = 'slowbit_entries'
 const MODE_KEY    = 'slowbit_mommode'
-export const MAX_WINS_PER_DAY = 3
+
+// ── Flower rotation ───────────────────────────────────────────
+// Each new win gets the next flower in the cycle.
+// Based on total number of wins ever logged — not per day.
+
+const FLOWER_TYPES = [
+  'pink-dahlia',
+  'lavender-tulip',
+  'mint-daisy',
+  'peach-rose',
+  'sunset-marigold',
+]
+
+export function getNextFlower() {
+  const all       = getAllEntries()
+  const totalWins = Object.values(all).filter(e => e.mode === 'win').length
+  return FLOWER_TYPES[totalWins % FLOWER_TYPES.length]
+}
 
 // ── Date helpers ──────────────────────────────────────────────
 
 export function todayKey() {
   const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+// "2026-05-14" → "14 May 2026"
 export function formatDate(key) {
   const [y, m, d] = key.split('-').map(Number)
-  return new Date(y, m-1, d).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+}
+
+// "2026-05-14" → "14 May"
+export function formatDateShort(key) {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short',
+  })
+}
+
+// How many days ago was this timestamp? Used for plant growth stage.
+export function daysAgo(timestamp) {
+  return Math.floor((Date.now() - timestamp) / 86400000)
 }
 
 // ── Core read / write ─────────────────────────────────────────
@@ -34,7 +66,9 @@ export function formatDate(key) {
 export function getAllEntries() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-  } catch { return {} }
+  } catch {
+    return {}
+  }
 }
 
 export function getEntry(key) {
@@ -45,90 +79,70 @@ export function getTodayEntry() {
   return getEntry(todayKey())
 }
 
-// Returns wins array for today (empty array if none)
-export function getTodayWins() {
-  return getTodayEntry()?.wins ?? []
-}
-
-// How many wins logged today (0–3)
-export function getTodayWinCount() {
-  return getTodayWins().length
-}
-
-// True if today has reached the 3-win limit
-export function isTodayFull() {
-  return getTodayWinCount() >= MAX_WINS_PER_DAY
-}
-
-// True if today has any entry (win or rest)
+// Has the user done anything today (win or rest)?
 export function hasTodayEntry() {
-  const entry = getTodayEntry()
-  if (!entry) return false
-  return entry.mode === 'rest' || (entry.wins && entry.wins.length > 0)
+  return !!getTodayEntry()
 }
+
+// ── Write actions ─────────────────────────────────────────────
 
 /**
- * Add a single win to today's entry.
- * Returns false if already at 3 wins or if mode is 'rest'.
+ * Save today's win.
+ * Flower is assigned automatically — UI doesn't need to know about it.
+ * Returns false if today already has any entry.
  */
-export function addTodayWin(text, flower) {
-  const key = todayKey()
-  const all = getAllEntries()
-  const today = all[key] ?? { wins: [], mode: 'win' }
+export function saveTodayWin(text) {
+  if (hasTodayEntry()) return false
 
-  if (today.mode === 'rest') return false
-  if ((today.wins?.length ?? 0) >= MAX_WINS_PER_DAY) return false
+  const key    = todayKey()
+  const all    = getAllEntries()
+  const flower = getNextFlower()
 
-  today.wins = today.wins ?? []
-  today.wins.push({ text: text.slice(0, 140), flower, timestamp: Date.now() })
-  today.mode = 'win'
+  all[key] = {
+    text:      text.slice(0, 140),
+    flower,
+    mode:      'win',
+    timestamp: Date.now(),
+  }
 
   try {
-    all[key] = today
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 /**
  * Mark today as a rest day.
- * Returns false if wins already exist today.
+ * Returns false if today already has any entry.
  */
 export function saveTodayRest() {
+  if (hasTodayEntry()) return false
+
   const key = todayKey()
   const all = getAllEntries()
-  const today = all[key]
 
-  // Don't overwrite wins with rest
-  if (today?.wins?.length > 0) return false
+  all[key] = {
+    text:      null,
+    flower:    null,
+    mode:      'rest',
+    timestamp: Date.now(),
+  }
 
-  all[key] = { wins: [], mode: 'rest', restTimestamp: Date.now() }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 // ── Query helpers ─────────────────────────────────────────────
 
 /**
- * Returns all individual win objects across all days, newest first.
- * Each item: { key, text, flower, timestamp }
- */
-export function getAllWinsSorted() {
-  const all = getAllEntries()
-  const wins = []
-  Object.entries(all).forEach(([key, entry]) => {
-    if (entry.wins) {
-      entry.wins.forEach(w => wins.push({ key, ...w }))
-    }
-  })
-  return wins.sort((a, b) => b.timestamp - a.timestamp)
-}
-
-/**
- * Returns all day entries as sorted array (newest first).
- * Used by Builder's Log.
+ * All entries sorted newest first.
+ * Used by JournalView.
  */
 export function getAllEntriesSorted() {
   const all = getAllEntries()
@@ -137,34 +151,78 @@ export function getAllEntriesSorted() {
     .sort((a, b) => b.key.localeCompare(a.key))
 }
 
+/**
+ * Entries for a specific month, oldest first (for grid display).
+ * month is 1-based (1 = January).
+ */
 export function getEntriesForMonth(year, month) {
-  const all = getAllEntries()
-  const prefix = `${year}-${String(month).padStart(2,'0')}`
+  const all    = getAllEntries()
+  const prefix = `${year}-${String(month).padStart(2, '0')}`
   return Object.entries(all)
     .filter(([key]) => key.startsWith(prefix))
     .map(([key, entry]) => ({ key, ...entry }))
-    .sort((a, b) => b.key.localeCompare(a.key))
+    .sort((a, b) => a.key.localeCompare(b.key))
 }
 
+/**
+ * Returns one dot object per calendar day for the month dot strip.
+ * Days with no entry have mode: null.
+ *
+ * Each dot: { day, key, mode, text, flower, timestamp }
+ */
+export function getMonthDots(year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const all         = getAllEntries()
+  const dots        = []
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key   = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    const entry = all[key] ?? null
+    dots.push({
+      day:       d,
+      key,
+      mode:      entry?.mode      ?? null,
+      text:      entry?.text      ?? null,
+      flower:    entry?.flower    ?? null,
+      timestamp: entry?.timestamp ?? null,
+    })
+  }
+
+  return dots
+}
+
+/**
+ * Count of win entries in a given month.
+ */
 export function getMonthWinCount(year, month) {
-  return getEntriesForMonth(year, month)
-    .reduce((sum, e) => sum + (e.wins?.length ?? 0), 0)
+  return getEntriesForMonth(year, month).filter(e => e.mode === 'win').length
 }
 
+/**
+ * Current consecutive day streak.
+ * Both 'win' and 'rest' days count — showing up to rest is showing up.
+ * If today has no entry yet, starts counting from yesterday.
+ */
 export function getCurrentStreak() {
-  const all = getAllEntries()
-  let streak = 0
-  const check = new Date()
+  const all      = getAllEntries()
+  let   streak   = 0
+  const check    = new Date()
   const todayStr = todayKey()
-  const todayE = all[todayStr]
-  if (!todayE || (!todayE.wins?.length && todayE.mode !== 'rest')) {
+
+  if (!all[todayStr]) {
     check.setDate(check.getDate() - 1)
   }
+
   while (true) {
-    const k = `${check.getFullYear()}-${String(check.getMonth()+1).padStart(2,'0')}-${String(check.getDate()).padStart(2,'0')}`
-    if (all[k]) { streak++; check.setDate(check.getDate()-1) }
-    else break
+    const k = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, '0')}-${String(check.getDate()).padStart(2, '0')}`
+    if (all[k]) {
+      streak++
+      check.setDate(check.getDate() - 1)
+    } else {
+      break
+    }
   }
+
   return streak
 }
 
@@ -173,12 +231,7 @@ export function getCurrentStreak() {
 export function saveMomMode(mode) {
   try { localStorage.setItem(MODE_KEY, mode) } catch {}
 }
+
 export function loadMomMode() {
   try { return localStorage.getItem(MODE_KEY) || 'day' } catch { return 'day' }
-}
-
-// ── Legacy compat (used by old PixelPlant getFlowerType) ──────
-export function getFlowerTypeByIndex(index) {
-  const order = ['pink-dahlia','lavender-tulip','mint-daisy','peach-rose','sunset-marigold']
-  return order[index % order.length]
 }
