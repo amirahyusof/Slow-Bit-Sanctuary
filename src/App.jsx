@@ -1,52 +1,51 @@
-// App.jsx — Phase 3C: FIXED - No padding from main container
-// FloatingRail is positioned OUTSIDE the main app container
-// Main container stays full width, FloatingRail overlays on top
+// App.jsx — v3.1
+// Flow: LoadingPage → ClickPage → Post-Click LoadingPage → Garden / Journal
 
 import { useState, useEffect } from 'react'
-import BottomNav from './components/BottomNav'
-import FloatingRail from './components/FloatingRail'
-import GardenView from './components/GardenView'
-import JournalView from './components/JournalView'
+import LoadingPage  from './components/LoadingPage'
+import WelcomePage  from './components/WelcomePage'
+import BottomNav    from './components/BottomNav'
+import GardenView   from './components/GardenView'
+import JournalView  from './components/JournalView'
 import { saveMomMode, loadMomMode } from './utils/storage'
 
+// ── Mom Mode themes ───────────────────────────────────────────
 const THEMES = {
   day: {
-    bg: '#FDE8D0',
-    shell: '#FFF8F0',
+    bg:     '#FDE8D0',
+    shell:  '#FFF8F0',
     border: '#D4BCA8',
-    label: '☀️ Bright Day',
+    label:  '☀️ bright day',
   },
   sunset: {
-    bg: '#F4A87C',
-    shell: '#FFF0DC',
+    bg:     '#F4A87C',
+    shell:  '#FFF0DC',
     border: '#C8784A',
-    label: '✦ Warm Sunset',
+    label:  '✦ warm sunset',
   },
 }
 
-export default function App() {
-  const [activePage, setActivePage] = useState('garden')
-  const [momMode, setMomMode] = useState('day')
-  const [refreshKey, setRefreshKey] = useState(0)
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1024
-  )
+// App-level screens updated to handle the extra transitional state
+const SCREEN = { 
+  LOADING: 'loading', 
+  CLICK: 'click', 
+  POST_CLICK_LOADING: 'post_click_loading', // Added state for the 2nd load
+  APP: 'app' 
+}
 
-  // Load Mom Mode from storage
+export default function App() {
+  const [screen,     setScreen]     = useState(SCREEN.LOADING)
+  const [activePage, setActivePage] = useState('garden')
+  const [momMode,    setMomMode]    = useState('day')
+  const [refreshKey, setRefreshKey] = useState(0)
+
   useEffect(() => {
     setMomMode(loadMomMode())
   }, [])
 
-  // Track window width for responsive layout
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
   function handleNavigate(page) {
     setActivePage(page)
-    setRefreshKey((k) => k + 1)
+    setRefreshKey(k => k + 1)
   }
 
   function handleMomModeToggle() {
@@ -54,151 +53,168 @@ export default function App() {
     setMomMode(next)
     saveMomMode(next)
   }
-  
-  function renderPage() {
-    const theme = THEMES[momMode]
-    
-    switch (activePage) {
-      case 'garden':   return <GardenView   key={refreshKey} momMode={momMode} theme={theme} />
-      case 'journal':  return <JournalView  key={refreshKey} momMode={momMode} theme={theme} />
-      default:         return <GardenView   key={refreshKey} momMode={momMode} theme={theme} />
-    }
-  }
 
   const theme = THEMES[momMode]
 
-  // Responsive breakpoints
-  const isMobile = windowWidth < 768
-  const isTablet = windowWidth >= 768 && windowWidth < 1024
-  const isDesktop = windowWidth >= 1024
-  const borderRadius = isMobile ? '12px' : isTablet ? '20px' : '8px'
+  // ── 1. First Loading screen (On initial app open) ───────────
+  if (screen === SCREEN.LOADING) {
+    return (
+      <AppShell theme={theme} showHeader={false} showNav={false}>
+        <LoadingPage onDone={() => setScreen(SCREEN.CLICK)} />
+      </AppShell>
+    )
+  }
 
+  // ── 2. Click / entry screen (Waits for tap) ─────────────────
+  if (screen === SCREEN.CLICK) {
+    return (
+      <AppShell theme={theme} showHeader={false} showNav={false}>
+        <WelcomePage onEnter={() => setScreen(SCREEN.POST_CLICK_LOADING)} />
+      </AppShell>
+    )
+  }
+
+  // ── 3. Second Loading screen (Runs right after tap) ─────────
+  if (screen === SCREEN.POST_CLICK_LOADING) {
+    return (
+      <AppShell theme={theme} showHeader={false} showNav={false}>
+        <LoadingPage onDone={() => setScreen(SCREEN.APP)} />
+      </AppShell>
+    )
+  }
+
+  // ── 4. Main app (Garden / Journal) ──────────────────────────
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        backgroundColor: '#EDE4D8',
-        padding: isMobile ? '8px' : isTablet ? '12px' : '8px',
-        position: 'relative',
-      }}
+    <AppShell
+      theme={theme}
+      showHeader={true}
+      showNav={true}
+      momModeLabel={theme.label}
+      onMomModeToggle={handleMomModeToggle}
+      activePage={activePage}
+      onNavigate={handleNavigate}
     >
-      {/* FIXED: Removed paddingRight from here - FloatingRail is outside this container */}
-      <div
-        style={{
-          width: isMobile ? '100%' : isTablet ? '95%' : '100%',
-          maxWidth: isDesktop ? '1400px' : 'none',
-          border: `2px solid ${theme.border}`,
-          borderRadius: borderRadius,
-          overflow: 'hidden',
-          backgroundColor: theme.shell,
-          boxShadow: isMobile
-            ? '0 2px 12px rgba(139,94,46,0.08)'
-            : '0 4px 24px rgba(139,94,46,0.12)',
-          transition: 'background-color 2000ms ease, border-color 2000ms ease, border-radius 300ms ease',
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-          maxHeight: '100vh',
-        }}
-      >
-        {/* ── Top bar ──────────────────────────────────── */}
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: isMobile
-              ? '12px 16px'
-              : isTablet
-              ? '14px 18px'
-              : '16px 20px',
+      {activePage === 'garden'
+        ? <GardenView  key={refreshKey} momMode={momMode} />
+        : <JournalView key={refreshKey} />
+      }
+    </AppShell>
+  )
+}
+
+// ── Shared shell wrapper ──────────────────────────────────────
+function AppShell({
+  theme,
+  showHeader,
+  showNav,
+  momModeLabel,
+  onMomModeToggle,
+  activePage,
+  onNavigate,
+  children,
+}) {
+  return (
+    <div style={{
+      minHeight:       '100vh',
+      display:         'flex',
+      justifyContent:  'center',
+      alignItems:      'flex-start',
+      backgroundColor: '#EDE4D8',
+      padding:         '8px',
+    }}>
+      <div style={{
+        width:           '100%',
+        maxWidth:        '480px',
+        border:          `2px solid ${theme.border}`,
+        borderRadius:    '20px',
+        overflow:        'hidden',
+        backgroundColor: theme.shell,
+        boxShadow:       '0 4px 24px rgba(139,94,46,0.10)',
+        transition:      'background-color 2000ms ease, border-color 2000ms ease',
+        display:         'flex',
+        flexDirection:   'column',
+        minHeight:       'calc(100vh - 16px)',
+      }}>
+
+        {showHeader && (
+          <header style={{
+            display:         'flex',
+            justifyContent:  'space-between',
+            alignItems:      'center',
+            padding:         '14px 18px',
             backgroundColor: theme.bg,
-            transition: 'background-color 2000ms ease',
-            flexShrink: 0,
-            borderBottom: `1px solid ${theme.border}`,
-          }}
-        >
-          <div>
-            <p
-              style={{
+            transition:      'background-color 2000ms ease',
+            flexShrink:      0,
+            borderBottom:    `1px solid ${theme.border}`,
+          }}>
+            <div>
+              <p style={{
                 fontFamily: '"Lora", Georgia, serif',
-                fontSize: isMobile ? '15px' : isTablet ? '16px' : '17px',
+                fontSize:   '11px',
+                color:      '#A88C74',
+                margin:     '0 0 1px',
+                fontStyle:  'italic',
+              }}>
+                the
+              </p>
+              <p style={{
+                fontFamily: '"Lora", Georgia, serif',
+                fontSize:   '16px',
                 fontWeight: '600',
-                color: '#4A3728',
-                margin: 0,
-              }}
-            >
-              Slow-Bit Sanctuary
-            </p>
-          </div>
+                color:      '#4A3728',
+                margin:     0,
+              }}>
+                Slow-Bit Sanctuary
+              </p>
+            </div>
 
-          <div
-            style={{
-              display: 'flex',
+            <div style={{
+              display:       'flex',
               flexDirection: 'column',
-              alignItems: 'flex-end',
-              gap: '4px',
-            }}
-          >
-            <span
-              style={{
+              alignItems:    'flex-end',
+              gap:           '3px',
+            }}>
+              <span style={{
                 fontFamily: '"Indie Flower", cursive',
-                fontSize: isMobile ? '9px' : isTablet ? '10px' : '11px',
-                color: '#A88C74',
-              }}
-            >
-              {theme.label}
-            </span>
-            <button
-              onClick={handleMomModeToggle}
-              style={{
-                fontFamily: '"Indie Flower", cursive',
-                fontSize: isMobile ? '13px' : isTablet ? '14px' : '16px',
-                color: '#7A5C44',
-                backgroundColor: 'rgba(253,251,247,0.8)',
-                border: `1.5px solid ${theme.border}`,
-                borderRadius: '20px',
-                padding: isMobile ? '3px 10px' : '4px 12px',
-                cursor: 'pointer',
-                boxShadow: '0 1px 4px rgba(139,94,46,0.1)',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              Mom Mode
-            </button>
-          </div>
-        </header>
+                fontSize:   '10px',
+                color:      '#A88C74',
+              }}>
+                {momModeLabel}
+              </span>
+              <button
+                onClick={onMomModeToggle}
+                style={{
+                  fontFamily:      '"Indie Flower", cursive',
+                  fontSize:        '13px',
+                  color:           '#7A5C44',
+                  backgroundColor: 'rgba(253,251,247,0.8)',
+                  border:          `1.5px solid ${theme.border}`,
+                  borderRadius:    '20px',
+                  padding:         '3px 12px',
+                  cursor:          'pointer',
+                  boxShadow:       '0 1px 4px rgba(139,94,46,0.08)',
+                  transition:      'all 2000ms ease',
+                }}
+              >
+                Mom Mode
+              </button>
+            </div>
+          </header>
+        )}
 
-        {/* ── Main content (scrollable) ──────────────────── */}
-        <main
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: isMobile ? '0' : isTablet ? '0' : isDesktop ? '16px' : '0',
-            backgroundColor: theme.shell,
-            transition: 'background-color 2000ms ease',
-          }}
-        >
-          {renderPage()}
+        <main style={{
+          flex:      1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}>
+          {children}
         </main>
 
-        {/* ── Conditional Navigation ────────────────────── */}
-        {/* BottomNav for mobile/tablet */}
-        {!isDesktop && <BottomNav activePage={activePage} onNavigate={handleNavigate} />}
-      </div>
+        {showNav && (
+          <BottomNav activePage={activePage} onNavigate={onNavigate} />
+        )}
 
-      {/* ── FloatingRail for desktop (FIXED position outside main container) ── */}
-      {isDesktop && (
-        <FloatingRail
-          activePage={activePage}
-          onNavigate={handleNavigate}
-          momMode={momMode}
-        />
-      )}
+      </div>
     </div>
   )
 }
