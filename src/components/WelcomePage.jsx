@@ -1,4 +1,4 @@
-// ClickPage.jsx — v3.0
+// ClickPage.jsx — v3.1 (Optimized for negative space overlay)
 // First screen the user sees on every app open.
 // Tap anywhere to proceed to the loading page → garden.
 
@@ -8,10 +8,10 @@ import clickFlower from '../assets/click_page.png'
 
 function getGreeting() {
   const hour = new Date().getHours()
-  if (hour < 12) return 'good morning'
-  if (hour < 17) return 'good afternoon'
-  if (hour < 21) return 'good evening'
-  return 'good night'
+  if (hour < 12) return 'Good Morning'
+  if (hour < 17) return 'Good Afternoon'
+  if (hour < 21) return 'Good Evening'
+  return 'Good Night'
 }
 
 function getSubtext(streak, todayEntry) {
@@ -56,33 +56,56 @@ export default function ClickPage({ onEnter }) {
     <div
       onClick={onEnter}
       style={{
-        minHeight:       '100%',
+        height:          '100vh',      // Fixes container to full viewport height
+        width:           '100%',
         display:         'flex',
         flexDirection:   'column',
         alignItems:      'center',
-        justifyContent:  'space-between',
         backgroundColor: '#FFF8F0',
         cursor:          'pointer',
         userSelect:      'none',
         opacity:         visible ? 1 : 0,
         transition:      'opacity 0.6s ease',
         overflow:        'hidden',
+        position:        'relative',   // Anchor for background and hints
       }}
     >
+      {/* ── Background Flower Image ────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        top:      0,
+        left:     0,
+        width:    '100%',
+        height:   '100%',
+        zIndex:   1,
+      }}>
+        <img
+          src={clickFlower}
+          alt="garden flowers"
+          style={{
+            width:     '100%',
+            height:    '100%',
+            objectFit: 'cover',        // Ensures the image fills the screen beautifully
+            display:   'block',
+            animation: 'floatSlow 5s ease-in-out infinite',
+          }}
+        />
+      </div>
 
-      {/* ── Top text block ──────────────────────────────── */}
+      {/* ── Top text block (Positioned over upper space) ── */}
       <div style={{
         display:       'flex',
         flexDirection: 'column',
         alignItems:    'center',
-        paddingTop:    '52px',
+        paddingTop:    '80px',         // Pushes the text down into the image's upper space
         gap:           '6px',
-        zIndex:        2,
+        zIndex:        2,              // Sits safely above the background image
+        position:      'relative',
       }}>
         {/* Greeting */}
         <p style={{
           fontFamily: '"Indie Flower", cursive',
-          fontSize:   '15px',
+          fontSize:   '16px',
           color:      '#A88C74',
           margin:     0,
           textAlign:  'center',
@@ -93,7 +116,7 @@ export default function ClickPage({ onEnter }) {
         {/* App name */}
         <p style={{
           fontFamily:    '"Lora", Georgia, serif',
-          fontSize:      '11px',
+          fontSize:      '12px',
           color:         '#C2A38A',
           fontStyle:     'italic',
           margin:        '0',
@@ -103,7 +126,7 @@ export default function ClickPage({ onEnter }) {
         </p>
         <p style={{
           fontFamily:    '"Lora", Georgia, serif',
-          fontSize:      '22px',
+          fontSize:      '24px',
           fontWeight:    '600',
           color:         '#4A3728',
           margin:        0,
@@ -116,7 +139,7 @@ export default function ClickPage({ onEnter }) {
         {/* Date */}
         <p style={{
           fontFamily: '"Indie Flower", cursive',
-          fontSize:   '13px',
+          fontSize:   '14px',
           color:      '#A88C74',
           margin:     '8px 0 0',
           textAlign:  'center',
@@ -127,58 +150,41 @@ export default function ClickPage({ onEnter }) {
         {/* Subtext */}
         <p style={{
           fontFamily: '"Lora", Georgia, serif',
-          fontSize:   '13px',
+          fontSize:   '14px',
           color:      '#8DAA91',
           fontStyle:  'italic',
-          margin:     '4px 0 0',
+          margin:     '8px 0 0',
           textAlign:  'center',
           lineHeight: '1.6',
-          maxWidth:   '240px',
+          maxWidth:   '260px',
         }}>
           {subtext}
         </p>
       </div>
 
-      {/* ── Flower image — fills bottom half ───────────── */}
+      {/* ── Tap hint ───────────────────────────────────── */}
       <div style={{
-        width:    '100%',
-        position: 'relative',
-        flexShrink: 0,
+        position:       'absolute',
+        bottom:         '40px',
+        left:           0,
+        right:          0,
+        display:        'flex',
+        flexDirection:  'column',
+        alignItems:     'center',
+        zIndex:         2,             // Sits above background
+        animation:      'pulse 2.5s ease-in-out infinite',
       }}>
-        <img
-          src={clickFlower}
-          alt="garden flowers"
-          style={{
-            width:     '100%',
-            display:   'block',
-            animation: 'floatSlow 5s ease-in-out infinite',
-          }}
-        />
-
-        {/* Tap hint — floats over the image bottom */}
-        <div style={{
-          position:       'absolute',
-          bottom:         '28px',
-          left:           0,
-          right:          0,
-          display:        'flex',
-          flexDirection:  'column',
-          alignItems:     'center',
-          gap:            '6px',
-          animation:      'pulse 2.5s ease-in-out infinite',
+        <span style={{
+          fontFamily:      '"Indie Flower", cursive',
+          fontSize:        '13px',
+          color:           '#7A5C44',
+          backgroundColor: 'rgba(255,248,240,0.85)',
+          padding:         '6px 18px',
+          borderRadius:    '20px',
+          border:          '1px solid rgba(194,163,138,0.3)',
         }}>
-          <span style={{
-            fontFamily:      '"Indie Flower", cursive',
-            fontSize:        '13px',
-            color:           '#7A5C44',
-            backgroundColor: 'rgba(255,248,240,0.85)',
-            padding:         '4px 16px',
-            borderRadius:    '20px',
-            border:          '1px solid rgba(194,163,138,0.3)',
-          }}>
-            tap anywhere to enter ✦
-          </span>
-        </div>
+          tap anywhere to enter ✦
+        </span>
       </div>
 
       <style>{`
