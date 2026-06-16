@@ -1,4 +1,4 @@
-// ClickPage.jsx — v3.1 (Optimized for negative space overlay)
+// WelcomePage.jsx — v3.1 (Optimized for negative space overlay)
 // First screen the user sees on every app open.
 // Tap anywhere to proceed to the loading page → garden.
 
@@ -33,7 +33,7 @@ function getSubtext(streak, todayEntry) {
   return "your garden is waiting. no rush."
 }
 
-export default function ClickPage({ onEnter }) {
+export default function WelcomePage({ onEnter }) {
   const [streak,     setStreak]     = useState(0)
   const [todayEntry, setTodayEntry] = useState(null)
   const [visible,    setVisible]    = useState(false)
@@ -56,7 +56,7 @@ export default function ClickPage({ onEnter }) {
     <div
       onClick={onEnter}
       style={{
-        height:          '100vh',      // Fixes container to full viewport height
+        height:          '100dvh',      // Fixes container to full viewport height
         width:           '100%',
         display:         'flex',
         flexDirection:   'column',
@@ -67,6 +67,7 @@ export default function ClickPage({ onEnter }) {
         opacity:         visible ? 1 : 0,
         transition:      'opacity 0.6s ease',
         overflow:        'hidden',
+        touchAction:     'none',
         position:        'relative',   // Anchor for background and hints
       }}
     >
